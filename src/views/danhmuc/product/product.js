@@ -110,7 +110,6 @@ export default function ProductsDemo() {
 
     const deleteProduct = () => {
         let _products = products.filter((val) => val.id !== product.id);
-
         setProducts(_products);
         setDeleteProductDialog(false);
         setProduct(emptyProduct);

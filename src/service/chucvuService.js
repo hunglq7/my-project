@@ -11,7 +11,20 @@ const addChucvu = async (data) => {
         return response
     })
 }
+
+const deleteChucvu = async (id) => {
+    return await api.delete(`Chucvu/${id}`).then(response => {
+        return response
+    })
+}
+const updateChucvu = async (data) => {
+    return await api.put('Chucvu/update', data).then(response => {
+        return response
+    })
+}
 export const chucvuService = {
     getChucvu,
-    addChucvu
+    addChucvu,
+    updateChucvu,
+    deleteChucvu
 }
