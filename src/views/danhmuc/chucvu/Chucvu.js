@@ -24,8 +24,8 @@ import { InputText } from 'primereact/inputtext';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined } from '@ant-design/icons';
-import { Button, Flex, Tooltip, Form, Input, Checkbox } from 'antd';
+import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
+import { Button, Flex, Tooltip } from 'antd';
 
 import { chucvuService } from '../../../service/chucvuService'
 import { Alert } from '@coreui/coreui';
@@ -138,8 +138,8 @@ function Chucvu() {
     );
     const chucvuDialogFooter = (
         <Flex wrap gap="small" justify='end'>
-            <Button color="primary" variant="outlined" icon={<SearchOutlined />} onClick={() => setChucvuDialog(false)}>
-                Cancel
+            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={() => setChucvuDialog(false)}>
+                Close
             </Button>
             <Button color="primary" variant="solid" icon={<SaveFilled />} onClick={saveChucvu}>
                 Save
