@@ -40,7 +40,12 @@ const _nav = [
       {
         component: CNavItem,
         name: 'Chức vụ',
-        to: '/danhmuc/chucvu',
+        to: '/chucvu/chucvu',
+      },
+      {
+        component: CNavItem,
+        name: 'product',
+        to: '/product/product',
       },
 
     ],

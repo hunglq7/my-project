@@ -6,7 +6,7 @@ const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 //danhmuc
 const Chucvu = React.lazy(() => import('./views/danhmuc/chucvu/Chucvu'))
-
+const Product = React.lazy(() => import('./views/danhmuc/product/Product'))
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -100,7 +100,8 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
-  { path: '/danhmuc/chucvu', name: 'Widgets', element: Chucvu },
+  { path: '/chucvu/chucvu', name: 'Widgets', element: Chucvu },
+  { path: '/product/product', name: 'Sản phẩm', element: Product },
 ]
 
 export default routes
