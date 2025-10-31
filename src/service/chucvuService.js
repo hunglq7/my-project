@@ -17,6 +17,12 @@ const deleteChucvu = async (id) => {
         return response
     })
 }
+
+const deleteChucvus = async (chucvus) => {
+    return await api.post(`Chucvu/DeleteMultipale`, chucvus).then(response => {
+        return response
+    })
+}
 const updateChucvu = async (data) => {
     return await api.put('Chucvu/update', data).then(response => {
         return response
@@ -26,5 +32,6 @@ export const chucvuService = {
     getChucvu,
     addChucvu,
     updateChucvu,
-    deleteChucvu
+    deleteChucvu,
+    deleteChucvus
 }

@@ -100,7 +100,7 @@ const routes = [
   { path: '/notifications/modals', name: 'Modals', element: Modals },
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
-  { path: '/chucvu/chucvu', name: 'Widgets', element: Chucvu },
+  { path: '/chucvu/chucvu', name: 'Chức vụ', element: Chucvu },
   { path: '/product/product', name: 'Sản phẩm', element: Product },
 ]
 

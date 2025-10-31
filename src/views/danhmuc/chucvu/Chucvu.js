@@ -12,15 +12,14 @@ import {
     CFormLabel,
     CFormSelect,
 } from '@coreui/react'
-import { CButton, CModal, CModalBody, CModalFooter, CModalHeader, CModalTitle } from '@coreui/react'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { DocsComponents } from 'src/components'
 import { Tag } from 'primereact/tag';
 import { Dialog } from 'primereact/dialog';
-import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { InputText } from 'primereact/inputtext';
+import { IconField } from 'primereact/iconfield';
+import { InputIcon } from 'primereact/inputicon';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -37,18 +36,18 @@ function Chucvu() {
         trangThai: true
     };
 
-    const chucvuUpdateToast = AppToasts({ title: "Thông báo", body: "Cập nhật bản ghi thành công" })
+    const chucvuUpdateToast = AppToasts({ title: "Thông báo", body: `"Cập nhật bản ghi thành công` })
     const chucvuAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const chucvuDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
-    const [visible, setVisible] = useState(false);
+    const chucvusDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
     const [chucvus, setChucvus] = useState([]);
     const [chucvuDialog, setChucvuDialog] = useState(false);
     const [deleteChucvuDialog, setDeleteChucvuDialog] = useState(false);
-    // const [deleteChucvusDialog, setDeleteChucvuDialog] = useState(false);
+    const [deleteChucvusDialog, setDeleteChucvusDialog] = useState(false);
     const [chucvu, setChucvu] = useState(emptyChucvu);
     const [selectedChucvus, setSelectedChucvus] = useState(null);
     const [submitted, setSubmitted] = useState(false);
-    // const [globalFilter, setGlobalFilter] = useState(null);
+    const [globalFilter, setGlobalFilter] = useState(null);
     const [toast, addToast] = useState()
     const toaster = useRef(null)
     const dt = useRef(null);
@@ -73,12 +72,12 @@ function Chucvu() {
         return (
             <React.Fragment>
                 <Flex wrap gap="small">
-                    <Tooltip title="Sửa" >
-                        <Button type='primary' shape="circle" icon={<EditFilled />} onClick={() => editChucvu(rowData)} />
-                    </Tooltip>
-                    <Tooltip title="Xóa">
-                        <Button color="danger" variant="solid" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDeleteChucvu(rowData)} />
-                    </Tooltip>
+
+                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => editChucvu(rowData)} />
+
+
+                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDeleteChucvu(rowData)} />
+
                 </Flex>
             </React.Fragment>
         );
@@ -89,7 +88,7 @@ function Chucvu() {
             <Flex wrap gap="small">
                 <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
 
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={() => confirmDeleteChucvu(rowData)} > Xóa</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedChucvus || !selectedChucvus.length}  > Xóa</Button>
 
             </Flex>
         );
@@ -116,7 +115,16 @@ function Chucvu() {
         addToast(chucvuDeleteToast)
     };
 
-
+    const deleteSelectedChucvus = () => {
+        let _chucvus = selectedChucvus;
+        chucvuService.deleteChucvus(_chucvus).then(response => {
+            if (response) {
+                addToast(chucvusDeleteToast)
+            }
+        })
+        setDeleteChucvusDialog(false);
+        setSelectedChucvus(null);
+    };
 
     const openNew = () => {
         setChucvu(emptyChucvu);
@@ -169,6 +177,15 @@ function Chucvu() {
 
         }
     }
+
+    const header = (
+        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+            <IconField iconPosition="left">
+                <InputIcon className="pi pi-search" />
+                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+            </IconField>
+        </div>
+    );
     const deleteChucvuDialogFooter = (
         <Flex wrap gap="small" justify='end'>
             <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteChucvuDialog(false)}>
@@ -180,6 +197,20 @@ function Chucvu() {
         </Flex>
 
     );
+
+    const deleteChucvusDialogFooter = (
+        <React.Fragment>
+            <Flex wrap gap="small" justify='end'>
+                <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteChucvusDialog(false)}>
+                    No
+                </Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelectedChucvus}>
+                    Yes
+                </Button>
+            </Flex>
+        </React.Fragment>
+    );
+
     const chucvuDialogFooter = (
         <Flex wrap gap="small" justify='end'>
             <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={() => setChucvuDialog(false)}>
@@ -209,6 +240,9 @@ function Chucvu() {
     const hideDeleteChucvuDialog = () => {
         setDeleteChucvuDialog(false);
     };
+    const hideDeleteChucvusDialog = () => {
+        setDeleteChucvusDialog(false);
+    };
     const hideDialog = () => {
         setSubmitted(false);
         setChucvuDialog(false);
@@ -217,13 +251,16 @@ function Chucvu() {
         setChucvu(chucvu);
         setDeleteChucvuDialog(true);
     };
+
+    const confirmDeleteSelected = () => {
+        setDeleteChucvusDialog(true);
+    };
     return (
         <>
             <CRow>
 
                 <CToaster className="p-3 z-500" placement="top-end" push={toast} ref={toaster} />
                 <CCol xs={12}>
-                    {/* <DocsComponents href="components/table/" /> */}
 
                     <CCard className="mb-4">
                         <CCardHeader>
@@ -231,9 +268,9 @@ function Chucvu() {
                         </CCardHeader>
                         <CCardBody>
                             <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-                            <DataTable ref={dt} table stripedRows rowHover value={chucvus} dataKey="id" onSelectionChange={(e) => setSelectedChucvus(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                            <DataTable ref={dt} table stripedRows rowHover value={chucvus} dataKey="id" selection={selectedChucvus} onSelectionChange={(e) => setSelectedChucvus(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                                currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi"  >
+                                currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
                                 <Column selectionMode="multiple" exportable={false}></Column>
                                 <Column field="id" header="ID" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="tenChucVu" header="Tên chức vụ" sortable style={{ minWidth: '16rem' }}></Column>
@@ -244,7 +281,7 @@ function Chucvu() {
                     </CCard>
                 </CCol>
             </CRow>
-//Dialog thêm mới, sửa bản ghi
+
             <Dialog visible={chucvuDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? "Sửa chức vụ" : "Thêm chức vụ"} modal className="p-fluid" footer={chucvuDialogFooter} onHide={hideDialog}>
                 <CForm className='mt-2'>
                     <CRow className="mb-3">
@@ -275,7 +312,7 @@ function Chucvu() {
 
 
 
-//Dialog xóa 1 bản ghi
+
             <Dialog visible={deleteChucvuDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteChucvuDialogFooter} onHide={hideDeleteChucvuDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
@@ -285,6 +322,13 @@ function Chucvu() {
                         </span>
                     )}
 
+                </div>
+            </Dialog>
+
+            <Dialog visible={deleteChucvusDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteChucvusDialogFooter} onHide={hideDeleteChucvusDialog}>
+                <div className="confirmation-content">
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                    {chucvu && <span>Bạn có chắc chắn muốn xóa các chức vụ đã chọn không?</span>}
                 </div>
             </Dialog>
         </>
