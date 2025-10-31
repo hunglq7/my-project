@@ -10,10 +10,8 @@ const AppFooter = () => {
         <span className="ms-1">&copy; {year} Lê Quang Hùng</span>
       </div>
       <div className="ms-auto">
-        <span className="me-1">Powered by</span>
-        <a href="#" target="_blank" rel="noopener noreferrer">
-          CoreUI React Admin &amp; Dashboard Template
-        </a>
+        <span className="me-1">Version 1</span>
+
       </div>
     </CFooter>
   )

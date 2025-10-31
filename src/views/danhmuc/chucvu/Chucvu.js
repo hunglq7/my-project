@@ -142,7 +142,9 @@ function Chucvu() {
 
     const onTrangthaiChange = (e) => {
         let _chucvu = { ...chucvu };
+
         _chucvu['trangThai'] = e.target.checked;
+        console.log("trạng thái:", _chucvu)
         setChucvu(_chucvu);
     };
 
@@ -255,6 +257,8 @@ function Chucvu() {
     const confirmDeleteSelected = () => {
         setDeleteChucvusDialog(true);
     };
+
+    console.log(chucvu)
     return (
         <>
             <CRow>
@@ -268,7 +272,7 @@ function Chucvu() {
                         </CCardHeader>
                         <CCardBody>
                             <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-                            <DataTable ref={dt} table stripedRows rowHover value={chucvus} dataKey="id" selection={selectedChucvus} onSelectionChange={(e) => setSelectedChucvus(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                            <DataTable ref={dt} stripedRows rowHover value={chucvus} dataKey="id" selection={selectedChucvus} onSelectionChange={(e) => setSelectedChucvus(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
                                 <Column selectionMode="multiple" exportable={false}></Column>
