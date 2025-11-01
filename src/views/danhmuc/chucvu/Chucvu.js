@@ -26,6 +26,7 @@ import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
 import { Button, Flex, Tooltip } from 'antd';
 import { chucvuService } from '../../../service/chucvuService'
+import { readAllChucvu, createChucvu, updateChucvu, deleteChucvu, deleteChucvus } from './chucvuSlice'
 import AppToasts from '../../../components/AppToasts';
 import { CToast, CToastBody, CToaster, CToastHeader } from '@coreui/react'
 
@@ -36,11 +37,11 @@ function Chucvu() {
         trangThai: true
     };
 
-    const chucvuUpdateToast = AppToasts({ title: "Thông báo", body: `"Cập nhật bản ghi thành công` })
+    const chucvuUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
     const chucvuAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const chucvuDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
     const chucvusDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
-    const [chucvus, setChucvus] = useState([]);
+    // const [chucvus, setChucvus] = useState([]);
     const [chucvuDialog, setChucvuDialog] = useState(false);
     const [deleteChucvuDialog, setDeleteChucvuDialog] = useState(false);
     const [deleteChucvusDialog, setDeleteChucvusDialog] = useState(false);
@@ -48,26 +49,25 @@ function Chucvu() {
     const [selectedChucvus, setSelectedChucvus] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
+    const dispatch = useDispatch()
     const [toast, addToast] = useState()
     const toaster = useRef(null)
     const dt = useRef(null);
 
-
+    const chucvus = useSelector(state => state.chucvus.data)
     useEffect(() => {
         async function fetchData() {
             try {
-                await chucvuService.getChucvu().then(response => {
-                    setChucvus(response.data)
-                })
+                // await chucvuService.getChucvu().then(response => {
+                //     setChucvus(response.data)
+                // })
+                dispatch(readAllChucvu())
             } catch (error) {
                 console.log(error)
             }
         }
         fetchData()
-    }, [chucvu])
-
-
-
+    }, [chucvus])
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
@@ -82,14 +82,11 @@ function Chucvu() {
             </React.Fragment>
         );
     };
-
     const leftToolbarTemplate = () => {
         return (
             <Flex wrap gap="small">
                 <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
-
                 <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedChucvus || !selectedChucvus.length}  > Xóa</Button>
-
             </Flex>
         );
     };
@@ -103,9 +100,14 @@ function Chucvu() {
         setChucvuDialog(true);
     };
 
-    const deleteChucvu = () => {
+    const onDeleteChucvu = () => {
         let id = chucvu.id;
-        chucvuService.deleteChucvu(id).then(response => {
+        // chucvuService.deleteChucvu(id).then(response => {
+        //     if (response) {
+        //         addToast(chucvuDeleteToast)
+        //     }
+        // })
+        dispatch(deleteChucvu(id)).then((response) => {
             if (response) {
                 addToast(chucvuDeleteToast)
             }
@@ -117,7 +119,12 @@ function Chucvu() {
 
     const deleteSelectedChucvus = () => {
         let _chucvus = selectedChucvus;
-        chucvuService.deleteChucvus(_chucvus).then(response => {
+        // chucvuService.deleteChucvus(_chucvus).then(response => {
+        //     if (response) {
+        //         addToast(chucvusDeleteToast)
+        //     }
+        // })
+        dispatch(deleteChucvus(_chucvus)).then((response) => {
             if (response) {
                 addToast(chucvusDeleteToast)
             }
@@ -134,15 +141,12 @@ function Chucvu() {
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
         let _chucvu = { ...chucvu };
-
         _chucvu[`${name}`] = val;
-
         setChucvu(_chucvu);
     };
 
     const onTrangthaiChange = (e) => {
         let _chucvu = { ...chucvu };
-
         _chucvu['trangThai'] = e.target.checked;
         console.log("trạng thái:", _chucvu)
         setChucvu(_chucvu);
@@ -161,18 +165,27 @@ function Chucvu() {
             let _chucvus = [...chucvus];
             let _chucvu = { ...chucvu };
             if (chucvu.id == 0) {
-                chucvuService.addChucvu(_chucvu).then((response) => {
+                // chucvuService.addChucvu(_chucvu).then((response) => {
+                //     if (response) {
+                //         addToast(chucvuAddToast)
+                //     }
+                // })
+                dispatch(createChucvu(_chucvu)).then((response) => {
                     if (response) {
                         addToast(chucvuAddToast)
                     }
                 })
             } else {
-                chucvuService.updateChucvu(_chucvu).then((response) => {
+                // chucvuService.updateChucvu(_chucvu).then((response) => {
+                //     if (response) {
+                //         addToast(chucvuUpdateToast)
+                //     }
+                // })
+                dispatch(updateChucvu(_chucvu)).then((response) => {
                     if (response) {
                         addToast(chucvuUpdateToast)
                     }
                 })
-
             }
             setChucvuDialog(false);
             setChucvu(emptyChucvu);
@@ -193,7 +206,7 @@ function Chucvu() {
             <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteChucvuDialog(false)}>
                 No
             </Button>
-            <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteChucvu}>
+            <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={onDeleteChucvu}>
                 Yes
             </Button>
         </Flex>
@@ -258,7 +271,6 @@ function Chucvu() {
         setDeleteChucvusDialog(true);
     };
 
-    console.log(chucvu)
     return (
         <>
             <CRow>
