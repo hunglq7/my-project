@@ -6,7 +6,12 @@ const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 //danhmuc
 const Chucvu = React.lazy(() => import('./views/danhmuc/chucvu/Chucvu'))
+const Donvi = React.lazy(() => import('./views/danhmuc/donvi/Donvi'))
 const Product = React.lazy(() => import('./views/danhmuc/product/Product'))
+//máy cào
+const Maycao = React.lazy(() => import('./views/maycao/Capnhatmaycao'))
+//Quạt gió
+const Quatgio = React.lazy(() => import('./views/quatgio/Capnhatquatgio'))
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -101,7 +106,10 @@ const routes = [
   { path: '/notifications/toasts', name: 'Toasts', element: Toasts },
   { path: '/widgets', name: 'Widgets', element: Widgets },
   { path: '/chucvu/chucvu', name: 'Chức vụ', element: Chucvu },
+  { path: '/donvi/donvi', name: 'Đơn vị', element: Donvi },
   { path: '/product/product', name: 'Sản phẩm', element: Product },
+  { path: '/maycao/capnhatmaycao', name: 'Cập nhật máy cào', element: Maycao },
+  { path: '/quatgio/capnhatquatgio', name: 'Cập nhật quạt gió', element: Quatgio },
 ]
 
 export default routes

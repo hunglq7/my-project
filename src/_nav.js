@@ -44,9 +44,48 @@ const _nav = [
       },
       {
         component: CNavItem,
+        name: 'Đơn vị',
+        to: '/donvi/donvi',
+      },
+      {
+        component: CNavItem,
         name: 'product',
         to: '/product/product',
       },
+
+    ],
+  },
+  {
+    component: CNavTitle,
+    name: 'Cập nhật thiết bị',
+  },
+  {
+    component: CNavGroup,
+    name: 'Máy cào',
+    to: '/maycao',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Cập nhật máy cào',
+        to: '/maycao/capnhatmaycao',
+      },
+
+
+    ],
+  },
+  {
+    component: CNavGroup,
+    name: 'Quạt gió',
+    to: '/quatgio',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+      {
+        component: CNavItem,
+        name: 'Cập nhật quạt gió',
+        to: '/quatgio/capnhatquatgio',
+      },
+
 
     ],
   },

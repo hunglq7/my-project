@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
     CCard,
     CCardBody,
@@ -9,7 +9,6 @@ import {
     CFormCheck,
     CFormInput,
     CFormLabel,
-    CFormSelect,
 } from '@coreui/react'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -22,29 +21,29 @@ import { InputIcon } from 'primereact/inputicon';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
-import { Button, Flex, Tooltip } from 'antd';
-import { chucvuService } from '../../../service/chucvuService'
+import { DeleteFilled, EditFilled, SaveFilled, UndoOutlined, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
+import { Button, Flex } from 'antd';
+import { donviService } from '../../../service/donviService'
 import AppToasts from '../../../components/AppToasts';
-import { CToast, CToastBody, CToaster, CToastHeader } from '@coreui/react'
+import { CToaster } from '@coreui/react'
 
-function Chucvu() {
-    let emptyChucvu = {
+function Donvi() {
+    let emptyDonvi = {
         id: 0,
-        tenChucVu: '',
+        tenPhong: '',
         trangThai: true
     };
 
-    const chucvuUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
-    const chucvuAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
-    const chucvuDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
-    const chucvusDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
-    const [chucvus, setChucvus] = useState([]);
-    const [chucvuDialog, setChucvuDialog] = useState(false);
-    const [deleteChucvuDialog, setDeleteChucvuDialog] = useState(false);
-    const [deleteChucvusDialog, setDeleteChucvusDialog] = useState(false);
-    const [chucvu, setChucvu] = useState(emptyChucvu);
-    const [selectedChucvus, setSelectedChucvus] = useState(null);
+    const donviUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
+    const donviAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
+    const donviDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
+    const donvisDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
+    const [donvis, setDonvis] = useState([]);
+    const [donviDialog, setDonviDialog] = useState(false);
+    const [deleteDonviDialog, setDeleteDonviDialog] = useState(false);
+    const [deleteDonvisDialog, setDeleteDonvisDialog] = useState(false);
+    const [donvi, setDonvi] = useState(emptyDonvi);
+    const [selectedDonvis, setSelectedDonvis] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isSave, setIsSave] = useState(false);
@@ -55,8 +54,8 @@ function Chucvu() {
     useEffect(() => {
         async function fetchData() {
             try {
-                await chucvuService.getChucvu().then(response => {
-                    setChucvus(response.data)
+                await donviService.getDonvi().then(response => {
+                    setDonvis(response.data)
                 })
             } catch (error) {
                 console.log(error)
@@ -68,8 +67,8 @@ function Chucvu() {
         return (
             <React.Fragment>
                 <Flex wrap gap="small">
-                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => editChucvu(rowData)} />
-                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDeleteChucvu(rowData)} />
+                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => editDonvi(rowData)} />
+                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDeleteDonvi(rowData)} />
                 </Flex>
             </React.Fragment>
         );
@@ -78,7 +77,7 @@ function Chucvu() {
         return (
             <Flex wrap gap="small">
                 <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedChucvus || !selectedChucvus.length}  > Xóa</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedDonvis || !selectedDonvis.length}  > Xóa</Button>
             </Flex>
         );
     };
@@ -86,57 +85,57 @@ function Chucvu() {
     const rightToolbarTemplate = () => {
         return <Button color="cyan" variant="solid" icon={<DownloadOutlined />} onClick={exportCSV} >Export</Button>;
     };
-    const editChucvu = (chucvu) => {
+    const editDonvi = (donvi) => {
         setSubmitted(true)
-        setChucvu({ ...chucvu });
-        setChucvuDialog(true);
+        setDonvi({ ...donvi });
+        setDonviDialog(true);
         setIsSave(false);
     };
 
-    const onDeleteChucvu = () => {
-        let id = chucvu.id;
-        chucvuService.deleteChucvu(id).then(response => {
+    const onDeleteDonvi = () => {
+        let id = donvi.id;
+        donviService.deleteDonvi(id).then(response => {
             if (response) {
-                addToast(chucvuDeleteToast)
+                addToast(donviDeleteToast)
                 setIsSave(true);
             }
         })
         setIsSave(false);
-        setDeleteChucvuDialog(false);
-        setChucvu(emptyChucvu);
-        addToast(chucvuDeleteToast)
+        setDeleteDonviDialog(false);
+        setDonvi(emptyDonvi);
+        addToast(donviDeleteToast)
     };
 
-    const deleteSelectedChucvus = () => {
-        let _chucvus = selectedChucvus;
-        chucvuService.deleteChucvus(_chucvus).then(response => {
+    const deleteSelectedDonvis = () => {
+        let _donvis = selectedDonvis;
+        donviService.deleteDonvis(_donvis).then(response => {
             if (response) {
-                addToast(chucvusDeleteToast)
+                addToast(donvisDeleteToast)
                 setIsSave(true);
             }
         })
         setIsSave(false);
-        setDeleteChucvusDialog(false);
-        setSelectedChucvus(null);
+        setDeleteDonvisDialog(false);
+        setSelectedDonvis(null);
     };
 
     const openNew = () => {
-        setChucvu(emptyChucvu);
+        setDonvi(emptyDonvi);
         setSubmitted(false);
-        setChucvuDialog(true);
+        setDonviDialog(true);
         setIsSave(false);
     };
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
-        let _chucvu = { ...chucvu };
-        _chucvu[`${name}`] = val;
-        setChucvu(_chucvu);
+        let _donvi = { ...donvi };
+        _donvi[`${name}`] = val;
+        setDonvi(_donvi);
     };
 
     const onTrangthaiChange = (e) => {
-        let _chucvu = { ...chucvu };
-        _chucvu['trangThai'] = e.target.checked;
-        setChucvu(_chucvu);
+        let _donvi = { ...donvi };
+        _donvi['trangThai'] = e.target.checked;
+        setDonvi(_donvi);
     };
 
 
@@ -145,29 +144,29 @@ function Chucvu() {
     };
 
 
-    const saveChucvu = () => {
+    const saveDonvi = () => {
         setSubmitted(true);
-        if (chucvu.tenChucVu.trim()) {
-            let _chucvu = { ...chucvu };
-            if (chucvu.id == 0) {
-                chucvuService.addChucvu(_chucvu).then((response) => {
+        if (donvi.tenPhong.trim()) {
+            let _donvi = { ...donvi };
+            if (donvi.id == 0) {
+                donviService.addDonvi(_donvi).then((response) => {
                     if (response) {
-                        addToast(chucvuAddToast)
+                        addToast(donviAddToast)
                         setIsSave(true);
                     }
                 })
 
             } else {
-                chucvuService.updateChucvu(_chucvu).then((response) => {
+                donviService.updateDonvi(_donvi).then((response) => {
                     if (response) {
-                        addToast(chucvuUpdateToast)
+                        addToast(donviUpdateToast)
                         setIsSave(true);
-                        setChucvuDialog(false);
+                        setDonviDialog(false);
                     }
                 })
             }
             setIsSave(false);
-            setChucvu(emptyChucvu);
+            setDonvi(emptyDonvi);
 
         }
     }
@@ -180,37 +179,37 @@ function Chucvu() {
             </IconField>
         </div>
     );
-    const deleteChucvuDialogFooter = (
+    const deleteDonviDialogFooter = (
         <Flex wrap gap="small" justify='end'>
-            <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteChucvuDialog(false)}>
+            <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteDonviDialog(false)}>
                 No
             </Button>
-            <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={onDeleteChucvu}>
+            <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={onDeleteDonvi}>
                 Yes
             </Button>
         </Flex>
 
     );
 
-    const deleteChucvusDialogFooter = (
+    const deleteDonvisDialogFooter = (
         <React.Fragment>
             <Flex wrap gap="small" justify='end'>
-                <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteChucvusDialog(false)}>
+                <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteDonvisDialog(false)}>
                     No
                 </Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelectedChucvus}>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelectedDonvis}>
                     Yes
                 </Button>
             </Flex>
         </React.Fragment>
     );
 
-    const chucvuDialogFooter = (
+    const donviDialogFooter = (
         <Flex wrap gap="small" justify='end'>
-            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={() => setChucvuDialog(false)}>
+            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={() => setDonviDialog(false)}>
                 Close
             </Button>
-            <Button color="primary" variant="solid" icon={<SaveFilled />} onClick={saveChucvu}>
+            <Button color="primary" variant="solid" icon={<SaveFilled />} onClick={saveDonvi}>
                 Save
             </Button>
         </Flex>
@@ -220,8 +219,8 @@ function Chucvu() {
         return <Tag value={rowData.trangThai ? "Đang dùng" : "Niêm cất"} severity={getSeverity(rowData)}></Tag>;
     };
 
-    const getSeverity = (chucvu) => {
-        switch (chucvu.trangThai) {
+    const getSeverity = (donvi) => {
+        switch (donvi.trangThai) {
             case true:
                 return 'success';
             case false:
@@ -231,23 +230,23 @@ function Chucvu() {
         }
     };
 
-    const hideDeleteChucvuDialog = () => {
-        setDeleteChucvuDialog(false);
+    const hideDeleteDonviDialog = () => {
+        setDeleteDonviDialog(false);
     };
-    const hideDeleteChucvusDialog = () => {
-        setDeleteChucvusDialog(false);
+    const hideDeleteDonvisDialog = () => {
+        setDeleteDonvisDialog(false);
     };
     const hideDialog = () => {
         setSubmitted(false);
-        setChucvuDialog(false);
+        setDonviDialog(false);
     };
-    const confirmDeleteChucvu = (chucvu) => {
-        setChucvu(chucvu);
-        setDeleteChucvuDialog(true);
+    const confirmDeleteDonvi = (donvi) => {
+        setDonvi(donvi);
+        setDeleteDonviDialog(true);
     };
 
     const confirmDeleteSelected = () => {
-        setDeleteChucvusDialog(true);
+        setDeleteDonvisDialog(true);
     };
 
     return (
@@ -259,16 +258,16 @@ function Chucvu() {
 
                     <CCard className="mb-4">
                         <CCardHeader>
-                            <strong>Cập nhật bảng</strong> <small>Chức vụ</small>
+                            <strong>Cập nhật bảng</strong> <small>Đơn vị</small>
                         </CCardHeader>
                         <CCardBody>
                             <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-                            <DataTable ref={dt} stripedRows rowHover value={chucvus} dataKey="id" selection={selectedChucvus} onSelectionChange={(e) => setSelectedChucvus(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                            <DataTable ref={dt} stripedRows rowHover value={donvis} dataKey="id" selection={selectedDonvis} onSelectionChange={(e) => setSelectedDonvis(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
                                 <Column selectionMode="multiple" exportable={false}></Column>
                                 <Column field="id" header="ID" sortable style={{ minWidth: '6rem' }}></Column>
-                                <Column field="tenChucVu" header="Tên chức vụ" sortable style={{ minWidth: '16rem' }}></Column>
+                                <Column field="tenPhong" header="Tên đơn vị" sortable style={{ minWidth: '16rem' }}></Column>
                                 <Column field="trangThai" header="Trạng thái" body={statusBodyTemplate} sortable style={{ minWidth: '16rem' }}></Column>
                                 <Column field='hanhDong' header="Hành động" body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
                             </DataTable>
@@ -277,28 +276,28 @@ function Chucvu() {
                 </CCol>
             </CRow>
 
-            <Dialog visible={chucvuDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? "Sửa chức vụ" : "Thêm chức vụ"} modal className="p-fluid" footer={chucvuDialogFooter} onHide={hideDialog}>
+            <Dialog visible={donviDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? "Sửa đơn vị" : "Thêm đơn vị"} modal className="p-fluid" footer={donviDialogFooter} onHide={hideDialog}>
                 <CForm className='mt-2'>
                     <CRow className="mb-3">
                         <CFormLabel htmlFor="id" className="col-sm-3 col-form-label">
                             Id
                         </CFormLabel>
                         <CCol sm={9}>
-                            <CFormInput value={chucvu.id} type="text" id="id" />
+                            <CFormInput value={donvi.id} type="text" id="id" />
                         </CCol>
                     </CRow>
                     <CRow className="mb-3">
-                        <CFormLabel htmlFor="tenChucVu" className="col-sm-3 col-form-label">
-                            Chức vụ
+                        <CFormLabel htmlFor="tenPhong" className="col-sm-3 col-form-label">
+                            Đơn vị
                         </CFormLabel>
                         <CCol sm={9}>
-                            <CFormInput value={chucvu.tenChucVu} onChange={(e) => onInputChange(e, 'tenChucVu')} type="text" id="tenChucVu" />
+                            <CFormInput value={donvi.tenPhong} onChange={(e) => onInputChange(e, 'tenPhong')} type="text" id="tenPhong" />
                         </CCol>
                     </CRow>
 
                     <CRow className="mb-3">
                         <div className="col-sm-9 offset-sm-3">
-                            <CFormCheck checked={chucvu.trangThai} onChange={onTrangthaiChange} type="checkbox" id="trangThai" label="Dự phòng" />
+                            <CFormCheck checked={donvi.trangThai} onChange={onTrangthaiChange} type="checkbox" id="trangThai" label="Dự phòng" />
                         </div>
                     </CRow>
 
@@ -308,26 +307,26 @@ function Chucvu() {
 
 
 
-            <Dialog visible={deleteChucvuDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteChucvuDialogFooter} onHide={hideDeleteChucvuDialog}>
+            <Dialog visible={deleteDonviDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteDonviDialogFooter} onHide={hideDeleteDonviDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {chucvu && (
+                    {donvi && (
                         <span>
-                            Bạn có chắc chắn muốn xóa <b>{chucvu.tenChucVu}</b>?
+                            Bạn có chắc chắn muốn xóa <b>{donvi.tenPhong}</b>?
                         </span>
                     )}
 
                 </div>
             </Dialog>
 
-            <Dialog visible={deleteChucvusDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteChucvusDialogFooter} onHide={hideDeleteChucvusDialog}>
+            <Dialog visible={deleteDonvisDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteDonvisDialogFooter} onHide={hideDeleteDonvisDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {chucvu && <span>Bạn có chắc chắn muốn xóa các chức vụ đã chọn không?</span>}
+                    {donvi && <span>Bạn có chắc chắn muốn xóa các chức vụ đã chọn không?</span>}
                 </div>
             </Dialog>
         </>
     )
 }
 
-export default Chucvu
+export default Donvi

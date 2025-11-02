@@ -13,7 +13,7 @@ import {
   CInputGroupText,
   CRow,
 } from '@coreui/react'
-
+import './login.scss'
 import { CCardHeader, CToast, CToastBody, CToastClose, CToastHeader, CToaster } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { cilLockLocked, cilUser } from '@coreui/icons'
@@ -60,17 +60,17 @@ const Login = () => {
 
 
   return (
-    <div className="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+    <div className=" backgoud-img bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
       <Toast ref={toast} />
       <CContainer>
-        <CRow className="justify-content-center">
-          <CCol md={8}>
+        <CRow className="justify-content-start">
+          <CCol md={4}>
             <CCardGroup>
-              <CCard className="p-4">
+              <CCard className="p-4 card-login">
                 <CCardBody>
                   <CForm ref={form}>
                     <h1>Login</h1>
-                    <p className="text-body-secondary">Sign In to your account</p>
+                    <p className="text-body-secondary hText">Sign In to your account</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupText>
                         <CIcon icon={cilUser} />
@@ -104,7 +104,7 @@ const Login = () => {
                   </CForm>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
+              {/* <CCard className="text-white bg-primary py-5" style={{ width: '44%' }}>
                 <CCardBody className="text-center">
                   <div>
                     <h2>Sign up</h2>
@@ -119,7 +119,7 @@ const Login = () => {
                     </Link>
                   </div>
                 </CCardBody>
-              </CCard>
+              </CCard> */}
             </CCardGroup>
           </CCol>
         </CRow>

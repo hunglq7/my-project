@@ -1,4 +1,4 @@
-import { data } from 'autoprefixer';
+
 import api from '../Utils/Api'
 
 const getChucvu = async () => {
