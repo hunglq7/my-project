@@ -5,11 +5,6 @@ import {
     CCardHeader,
     CCol,
     CRow,
-    CForm,
-    CFormCheck,
-    CFormInput,
-    CFormLabel,
-    CFormSelect,
 } from '@coreui/react'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -17,24 +12,28 @@ import { Tag } from 'primereact/tag';
 import { Dialog } from 'primereact/dialog';
 import { Toolbar } from 'primereact/toolbar';
 import { InputText } from 'primereact/inputtext';
-import { InputNumber } from 'primereact/inputnumber';
+// import { InputNumber } from 'primereact/inputnumber';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
-import { Button, Flex, Tooltip } from 'antd';
+import { Button, Checkbox, Form, Input, Flex } from 'antd';
+import { InputNumber } from 'antd';
 import AppToasts from '../../components/AppToasts';
 import { CToast, CToastBody, CToaster, CToastHeader } from '@coreui/react'
 import { CTab, CTabContent, CTabList, CTabPanel, CTabs } from '@coreui/react'
 import { quatgioService } from '../../service/quatgioService';
-import FormCapnhatQuatgio from './FormCapnhatQuatgio';
+import Nhatkyquatgio from './Nhatkyquatgio';
+
+
 function Capnhatquatgio() {
 
     let emptyQuatgio = {
         id: 0,
-        tenChucVu: '',
+        tenThietBi: '',
+        soLuong: 1,
         trangThai: true
     };
     const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
@@ -102,6 +101,24 @@ function Capnhatquatgio() {
         setDeleteQuatgioDialog(false);
         setQuatgio(emptyQuatgio);
     };
+
+    const onInputChange = (e, name) => {
+        const val = (e.target && e.target.value) || '';
+        let _quatgio = { ...quatgio };
+        _quatgio[`${name}`] = val;
+        setQuatgio(_quatgio);
+    };
+
+    const onInputNumberChange = (e, name) => {
+        const val = e.value || 0;
+        console.log(val)
+        let _quatgio = { ...quatgio };
+
+        _quatgio[`${name}`] = val;
+
+        setQuatgio(_quatgio);
+    };
+
 
     const deleteSelectedQuatgios = () => {
         let _quatgios = selectedQuatgios;
@@ -171,15 +188,15 @@ function Capnhatquatgio() {
     };
 
     const statusBodyTemplate = (rowData) => {
-        return <Tag value={rowData.duPhong ? "Đang dùng" : "Dự phòng"} severity={getSeverity(rowData)}></Tag>;
+        return <Tag value={rowData.duPhong ? "Dự phòng" : "Đang dùng"} severity={getSeverity(rowData)}></Tag>;
     };
 
     const getSeverity = (quatgio) => {
         switch (quatgio.duPhong) {
             case true:
-                return 'success';
-            case false:
                 return 'warning';
+            case false:
+                return 'success';
             default:
                 return null;
         }
@@ -210,6 +227,8 @@ function Capnhatquatgio() {
         setDeleteQuatgiosDialog(true);
     };
 
+
+    console.log(quatgio)
     return (
         <>
 
@@ -229,6 +248,7 @@ function Capnhatquatgio() {
                                 <Column selectionMode="multiple" exportable={false}></Column>
                                 <Column field="maQuanLy" header="Mã quản lý" sortable style={{ minWidth: '2rem' }}></Column>
                                 <Column field="tenThietBi" header="Thiết bị" sortable style={{ minWidth: '6rem' }}></Column>
+                                <Column field="tenDonVi" header="Đơn vị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="viTriLapDat" header="Vị trí lắp đặt" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="tinhTrangThietBi" header="Tình trạng thiết bị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="soLuong" header="SL đang dùng" sortable style={{ minWidth: '8rem' }}></Column>
@@ -251,12 +271,48 @@ function Capnhatquatgio() {
                         </CTabList>
                         <CTabContent>
                             <CTabPanel className="py-3 " aria-labelledby="home-tab-pane" itemKey={1}>
+                                <Form
+                                    name="basic"
+                                    labelCol={{ span: 8 }}
+                                    wrapperCol={{ span: 16 }}
+                                    style={{ maxWidth: 600 }}
+                                    initialValues={{ remember: true }}
+                                    autoComplete="off"
 
-                                <FormCapnhatQuatgio></FormCapnhatQuatgio>
+                                >
+                                    <Form.Item
+                                        label="Thiết bị"
+                                        name="tenThietBi"
+                                        rules={[{ required: true, message: 'Tên thiết bị phải nhập!' }]}
+                                    >
+                                        <Input value={quatgio.tenThietbi} onChange={(e) => onInputChange(e, 'tenThietBi')} />
+                                    </Form.Item>
 
+                                    <Form.Item
+                                        label="Password"
+                                        name="password"
+                                        rules={[{ required: true, message: 'Please input your password!' }]}
+                                    >
+                                        <Input.Password />
+                                    </Form.Item>
+
+                                    <Form.Item name="soLuong" label="Số lượng" rules={[{ type: 'number', min: 0, max: 99 }]}>
+                                        <InputNumber min={1} max={10} value={quatgio.soLuong} onChange={(e) => onInputNumberChange(e, 'soLuong')} />
+                                    </Form.Item>
+
+                                    <Form.Item name="remember" valuePropName="checked" label={null}>
+                                        <Checkbox>Dự phòng</Checkbox>
+                                    </Form.Item>
+
+                                    <Form.Item label={null}>
+                                        <Button type="primary" htmlType="submit">
+                                            Submit
+                                        </Button>
+                                    </Form.Item>
+                                </Form>
                             </CTabPanel>
                             <CTabPanel className="py-3 " aria-labelledby="profile-tab-pane" itemKey={2}>
-                                Nhật ký máy cào
+                                <Nhatkyquatgio />
                             </CTabPanel>
                             <CTabPanel className="py-3" aria-labelledby="contact-tab-pane" itemKey={3}>
                                 Thông số kỹ thuật
