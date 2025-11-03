@@ -202,12 +202,6 @@ function Capnhatquatgio() {
         }
     };
 
-    const soluongBodyTemplate = (quatgio) => {
-        return (
-            <InputNumber inputId="integeronly" value={quatgio.soLuong} onValueChange={(e) => setChucvu(e.value)} />
-        )
-    }
-
     const hideDeleteQuatgioDialog = () => {
         setDeleteQuatgioDialog(false);
     };
