@@ -1,28 +1,29 @@
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
-
-import React, { Component, useEffect, useState, useRef, useMemo, useCallback } from 'react'
+import { quatgioService } from '../../service/quatgioService';
+import React, { Component, useEffect, useState, useRef, useMemo, useCallback, useContext } from 'react'
 import { Alert, Button, Flex, Tooltip } from 'antd';
 import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
+
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-function Nhatkyquatgio() {
-
+function Nhatkyquatgio({ quatgio }) {
     const gridRef = useRef(null);
-    const CustomButtonComponent = (props) => {
-        return (
-            <>
-                <Flex wrap gap="small">
-                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => addNewRow} />
-                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => alert("Xóa")} />
-                </Flex>
-            </>
-        )
-    };
+    const id = quatgio.id
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                await quatgioService.getNhatkyById(id).then(response => {
+                    setRowData(response.data)
+                    console.log("data:", response.data)
+                })
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchData()
+    }, [])
     const [rowData, setRowData] = useState([
-        { make: "Tesla", model: "Model Y", price: 64950, electric: true },
-        { make: "Ford", model: "F-Series", price: 33850, electric: false },
-        { make: "Toyota", model: "Corolla", price: 29600, electric: false },
     ]);
 
     const defaultColDef = useMemo(() => {
@@ -33,39 +34,93 @@ function Nhatkyquatgio() {
     }, []);
 
 
-
     // Column Definitions: Defines the columns to be displayed.
     const [colDefs, setColDefs] = useState([
         {
-            field: "make", cellEditor: "agTextCellEditor",
-            cellEditorParams: {
-                maxLength: 20
-            },
+            field: 'id',
+            headerName: 'Id',
+            hide: true,
         },
-        { field: "model" },
-        { field: "price" },
-        { field: "electric" },
-        { field: "button", cellRenderer: CustomButtonComponent },
+        {
+            field: 'tonghopquatgioId',
+            hide: true,
+        },
+        {
+            field: 'ngaythang',
+            headerName: 'Ngày sử dụng',
+            editable: true,
+            cellEditorPopup: true,
+        },
+        {
+            field: 'donVi',
+            headerName: 'Đơn vị',
+            editable: true,
+            cellEditorPopup: true,
+        },
+
+        {
+            field: 'viTri',
+            headerName: 'Vị trí',
+            editable: true,
+            cellEditorPopup: true,
+        },
+        {
+            field: 'trangThai',
+            headerName: 'Tình trạng',
+            editable: true,
+            cellEditor: 'agLargeTextCellEditor',
+            cellEditorParams: { maxLength: 10000 },
+        },
+        { field: 'ghiChu', headerName: 'Ghi chú' },
 
 
     ]);
 
-    const addNewRow = useCallback(() => {
-        const { api } = gridRef.current || {};
-        if (!api) {
-            return;
-        }
-        api.setGridOption("pinnedTopRowData", [
-            { make: null, model: null, price: 0, electric: true },
-        ]);
-        setTimeout(() => {
-            api.startEditingCell({
-                rowIndex: 0,
-                rowPinned: "bottom",
-                colKey: "symbol",
-            });
+
+    function createNewRowData() {
+        const newData = {
+            id: 0,
+            tonghopquatgioId: id,
+            ngaythang: "",
+            donVi: "",
+            viTri: "",
+            trangThai: true,
+            ghiChu: ""
+        };
+
+        return newData;
+    }
+
+
+    const addItems = useCallback(() => {
+        const newItems = [
+            createNewRowData(),
+        ];
+        const res = gridRef.current.api.applyTransaction({
+            add: newItems,
+            addIndex: 0,
         });
+        console.log("res", res)
     }, []);
+
+    const Save = useCallback(() => {
+        const seletcRow = gridRef.current.api.getSelectedRows()
+        console.log("Dữ liệu khi save", seletcRow)
+        quatgioService.addNhatkyquatgio(seletcRow).then(response => {
+            if (response) {
+                alert("Lưu thành công")
+            }
+            else {
+                alert("Lưu thất bại")
+            }
+        })
+
+    }, [])
+
+    const deleteRow = useCallback(() => {
+        const seletcRow = gridRef.current.api.getSelectedRows()
+        alert(JSON.stringify(seletcRow))
+    }, [])
 
     const rowSelection = useMemo(() => {
         return {
@@ -80,10 +135,11 @@ function Nhatkyquatgio() {
 
 
             <Flex wrap gap="small" justify='start' className='mb-2'>
-                <Button type="primary" icon={<UndoOutlined />} onClick={addNewRow}>
+                <Button type="primary" icon={<UndoOutlined />} onClick={() => addItems()}>
                     Add New
                 </Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={() => alert("Xóa")}>
+                <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={Save} >Save</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteRow}>
                     Delete
                 </Button>
             </Flex>

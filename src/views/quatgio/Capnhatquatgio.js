@@ -221,8 +221,6 @@ function Capnhatquatgio() {
         setDeleteQuatgiosDialog(true);
     };
 
-
-    console.log(quatgio)
     return (
         <>
 
@@ -306,7 +304,9 @@ function Capnhatquatgio() {
                                 </Form>
                             </CTabPanel>
                             <CTabPanel className="py-3 " aria-labelledby="profile-tab-pane" itemKey={2}>
-                                <Nhatkyquatgio />
+
+                                <Nhatkyquatgio quatgio={quatgio} />
+
                             </CTabPanel>
                             <CTabPanel className="py-3" aria-labelledby="contact-tab-pane" itemKey={3}>
                                 Thông số kỹ thuật
