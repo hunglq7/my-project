@@ -104,9 +104,9 @@ function Nhatkyquatgio({ quatgio }) {
     }, []);
 
     const Save = useCallback(() => {
-        const seletcRow = gridRef.current.api.getSelectedRows()
-        console.log("Dữ liệu khi save", seletcRow)
-        quatgioService.addNhatkyquatgio(seletcRow).then(response => {
+        let seletcRow = gridRef.current.api.getSelectedRows()
+        console.log("Dữ liệu khi save", seletcRow[0])
+        quatgioService.addNhatkyquatgio(seletcRow[0]).then(response => {
             if (response) {
                 alert("Lưu thành công")
             }
