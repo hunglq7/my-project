@@ -10,7 +10,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 function Nhatkyquatgio({ quatgio }) {
     const gridRef = useRef(null);
-    const id = quatgio.id
+    const id = quatgio
     const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const quatgioAddErorToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thất bại" })
     const quatgioDeleteErorToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thất bại" })

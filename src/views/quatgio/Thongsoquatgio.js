@@ -16,7 +16,6 @@ const Thongsoquatgio = ({ quatgio }) => {
         }
         fetchData()
     }, []);
-    console.log(thongsoquatgio)
     return (
         <>
             <div className="container-fluid">

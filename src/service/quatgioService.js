@@ -6,6 +6,12 @@ const getQuatgio = async () => {
     });
 };
 
+const getQuatgioById = async (id) => {
+    return await api.get(`Tonghopquatgio/${id}`).then((response) => {
+        return response
+    });
+};
+
 const getNhatkyById = async (id) => {
     return await api.get(`Nhatkyquatgio/DatailById/${id}`).then(response => {
         return response
@@ -67,6 +73,7 @@ const deleteQuatgios = async (datas) => {
 }
 export const quatgioService = {
     getQuatgio,
+    getQuatgioById,
     deleteQuatgio,
     deleteQuatgios,
     getNhatkyById,

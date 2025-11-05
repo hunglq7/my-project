@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState, useRef } from 'react'
+import React, { Component, useEffect, useState, useRef, useCallback } from 'react'
 import {
     CCard, CCardBody, CCardHeader, CCol, CRow,
     CButton, CForm, CFormCheck, CFormInput, CFormSelect
@@ -12,6 +12,7 @@ import { InputText } from 'primereact/inputtext';
 // import { InputNumber } from 'primereact/inputnumber';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
+import { Dropdown } from 'primereact/dropdown';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -22,28 +23,36 @@ import AppToasts from '../../components/AppToasts';
 import { CToaster } from '@coreui/react'
 import { CTab, CTabContent, CTabList, CTabPanel, CTabs } from '@coreui/react'
 import { quatgioService } from '../../service/quatgioService';
+import { donviService } from '../../service/donviService';
 import Nhatkyquatgio from './Nhatkyquatgio';
 import Thongsoquatgio from './Thongsoquatgio';
-import { data } from 'react-router-dom';
-
+import moment from 'moment';
 
 function Capnhatquatgio() {
-
+    const newDate = new Date();
     let emptyQuatgio = {
         id: 0,
-        tenThietBi: '',
+        maQuanLy: '',
+        quatGioId: '',
+        donViId: 0,
+        viTriLapDat: '',
+        ngayLap: { newDate },
         soLuong: 1,
-        trangThai: true
+        tinhTrangThietBi: '',
+        duPhong: true,
+        ghiChu: ''
     };
     const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
     const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const qutgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
     const quatgiosDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
     const [quatgios, setQuatgios] = useState([]);
+    const [donvis, setDonvis] = useState([]);
     const [quatgioDialog, setQuatgioDialog] = useState(false);
     const [deleteQuatgioDialog, setDeleteQuatgioDialog] = useState(false);
     const [deleteQuatgiosDialog, setDeleteQuatgiosDialog] = useState(false);
     const [quatgio, setQuatgio] = useState(emptyQuatgio);
+    const [quatgioId, setQuatgioId] = useState(null);
     const [selectedQuatgios, setSelectedQuatgios] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
@@ -62,10 +71,19 @@ function Capnhatquatgio() {
                 console.log(error)
             }
         }
-        fetchData()
+        fetchData();
+        getDonvis()
     }, [isSave])
 
-
+    const getDonvis = useCallback(async () => {
+        try {
+            await donviService.getDonvi().then(response => {
+                setDonvis(response.data)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
     const leftToolbarTemplate = () => {
         return (
             <Flex wrap gap="small">
@@ -117,7 +135,14 @@ function Capnhatquatgio() {
 
         setQuatgio(_quatgio);
     };
+    const ngaylapBodyTemplate = (rowData) => {
+        return formatDate(rowData.ngayLap);
+    };
 
+    const formatDate = (value) => {
+        const date = moment(value).format("DD/MM/YYYY");
+        return date
+    };
 
     const deleteSelectedQuatgios = () => {
         let _quatgios = selectedQuatgios;
@@ -173,18 +198,24 @@ function Capnhatquatgio() {
         setQuatgioDialog(true);
         setIsSave(false);
     };
-    const editQuatgio = (quatgio) => {
-        let _quatgio = quatgio;
-        let myDate = new Date(_quatgio.ngayLap)
-        let myDateString =
-            myDate.getFullYear() +
-            '-' +
-            ('0' + (myDate.getMonth() + 1)).slice(-2) +
-            '-' +
-            ('0' + myDate.getDate()).slice(-2);
-        _quatgio.ngayLap = myDateString;
+
+    const editQuatgio = (rowData) => {
+        const id = rowData.id;
+        setQuatgioId(id)
+        quatgioService.getQuatgioById(id).then(response => {
+            if (response) {
+
+                const _quatgio = response.data;
+                const _ngayLap = _quatgio.ngayLap;
+                const date = moment(_ngayLap).format("YYYY-MM-DD");
+                _quatgio.ngayLap = date;
+                setQuatgio({ ..._quatgio })
+            }
+            else {
+                console.log("Lỗi lấy dữ liệu chi tiết quạt gió theo id")
+            }
+        })
         setSubmitted(true)
-        setQuatgio({ ..._quatgio });
         setQuatgioDialog(true);
         setIsSave(false);
     };
@@ -230,6 +261,7 @@ function Capnhatquatgio() {
     };
 
     console.log(quatgio)
+    console.log(donvis)
     return (
         <>
 
@@ -243,7 +275,7 @@ function Capnhatquatgio() {
                         </CCardHeader>
                         <CCardBody>
                             <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-                            <DataTable ref={dt} stripedRows rowHover value={quatgios} dataKey="id" selection={selectedQuatgios} onSelectionChange={(e) => setSelectedQuatgios(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                            <DataTable ref={dt} size='normal' stripedRows rowHover value={quatgios} dataKey="id" selection={selectedQuatgios} onSelectionChange={(e) => setSelectedQuatgios(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
                                 <Column selectionMode="multiple" exportable={false}></Column>
@@ -251,7 +283,7 @@ function Capnhatquatgio() {
                                 <Column field="tenThietBi" header="Thiết bị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="tenDonVi" header="Đơn vị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="viTriLapDat" header="Vị trí lắp đặt" sortable style={{ minWidth: '6rem' }}></Column>
-                                <Column field="ngayLap" header="Ngày lắp" sortable style={{ minWidth: '6rem' }}></Column>
+                                <Column field="ngayLap" header="Ngày lắp" body={ngaylapBodyTemplate} sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="soLuong" header="SL đang dùng" sortable style={{ minWidth: '8rem' }}></Column>
                                 <Column field="duPhong" header="Tình trạng TB" body={statusBodyTemplate} sortable style={{ minWidth: '16rem' }}></Column>
                                 <Column field='hanhDong' header="Hành động" body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
@@ -272,16 +304,17 @@ function Capnhatquatgio() {
                         </CTabList>
                         <CTabContent>
                             <CTabPanel className="py-3 " aria-labelledby="Capnhat-tab-pane" itemKey={1}>
-                                <CForm className="row g-3">
+                                <CForm className="row g-3 ">
+                                    <CCol md={6}>
+                                        <CFormInput value={quatgio.id} onChange={(e) => onInputChange(e, 'id')} type="text" id="maQuanLy" label="Mã quản lý:" />
+                                    </CCol>
                                     <CCol md={6}>
                                         <CFormInput value={quatgio.maQuanLy} onChange={(e) => onInputChange(e, 'maQuanLy')} type="text" id="maQuanLy" label="Mã quản lý:" />
                                     </CCol>
                                     <CCol md={6}>
                                         <CFormInput value={quatgio.tenThietBi} onChange={(e) => onInputChange(e, 'tenThietBi')} type="text" id="tenThietBi" label="Thiết bị:" />
                                     </CCol>
-                                    <CCol md={6}>
-                                        <CFormInput value={quatgio.tenDonVi} onChange={(e) => onInputChange(e, 'tenDonVi')} type="text" id="tenDonVi" label="Đơn vị:" />
-                                    </CCol>
+
                                     <CCol md={12}>
                                         <CFormInput value={quatgio.viTriLapDat} onChange={(e) => onInputChange(e, 'viTriLapDat')} type="text" id="viTriLapDat" label="Vị trí lắp đặt:" />
                                     </CCol>
@@ -294,27 +327,61 @@ function Capnhatquatgio() {
                                     <CCol md={6}>
                                         <CFormInput value={quatgio.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
                                     </CCol>
+                                    <CFormSelect value={donvis.donViId} onChange={(e) => onInputChange(e, 'donViId')}>
+                                        {donvis.map((items) => {
+                                            <options key={items.id} value={items.id}>
+                                                {items.tenPhong}
+                                            </options>
+                                        })}
+                                    </CFormSelect>
 
-                                    <CCol md={4}>
-                                        <CFormSelect id="donVi" label="Đơn vị">
-                                            <option>Choose...</option>
-                                            <option>...</option>
-                                        </CFormSelect>
+                                    <CFormSelect
+                                        aria-label="Default select example"
+
+
+                                        options={[
+                                            { label: 'Open this select menu' },
+                                            { label: 'One', value: '1' },
+                                            { label: 'Two', value: '2' },
+                                            { label: 'Three', value: '3', disabled: true },
+                                        ]}
+                                    />
+
+                                    <CCol md={6}>
+                                        {/* <div className="card flex justify-content-center">
+                                            <Dropdown size="small" value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} options={donvis} optionLabel="tenPhong"
+                                                placeholder="Chọn đơn vị" className="w-full md:w-14rem" />
+                                        </div> */}
+                                        <select value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} >
+                                            {donvis.map((items, index) => {
+                                                <option key={index} value={items.id}>{items.tenPhong}</option>
+                                            })}
+                                        </select>
+
+
                                     </CCol>
 
-                                    <CCol xs={12}>
+                                    <CCol md={12}>
                                         <CFormCheck checked={quatgio.duPhong} onChange={(e) => onDuphongChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
                                     </CCol>
                                     <CCol xs={12}>
-                                        <CButton color="primary" type="submit">
+                                        {/* <CButton color="primary" type="submit">
                                             Lưu
-                                        </CButton>
+                                        </CButton> */}
+                                        <Flex wrap gap="small" justify='start'>
+                                            <Button type="primary" icon={<SaveFilled />} >
+                                                Lưu
+                                            </Button>
+                                            <Button color="danger" variant="solid" icon={<UndoOutlined />} type="submit" >
+                                                Không
+                                            </Button>
+                                        </Flex>
                                     </CCol>
                                 </CForm>
                             </CTabPanel>
                             <CTabPanel className="py-3 " aria-labelledby="Nhatky-tab-pane" itemKey={2}>
 
-                                <Nhatkyquatgio quatgio={quatgio} />
+                                <Nhatkyquatgio quatgio={quatgioId} />
 
                             </CTabPanel>
                             <CTabPanel className="py-3" aria-labelledby="Thongso-tab-pane" itemKey={3}>
