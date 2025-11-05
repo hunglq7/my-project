@@ -12,6 +12,12 @@ const getNhatkyById = async (id) => {
     })
 }
 
+const getThongsoquatgioById = async (id) => {
+    return await api.get(`Thongsokythuatmayxuc/DetailById/${id}`).then(response => {
+        return response
+    })
+}
+
 const addNhatkyquatgios = async (datas) => {
     console.log("Dữ liệu api", datas)
     return await api.put(`Nhatkyquatgio/UpdateMultiple`, datas).then(response => {
@@ -41,6 +47,12 @@ const addNhatkyquatgio = async (data) => {
 
 }
 
+const deleteNhatkyQuatgios = async (datas) => {
+    return await api.post(`Nhatkyquatgio/DeleteMultipale`, datas).then(response => {
+        return response
+    })
+}
+
 
 const deleteQuatgio = async (id) => {
     return await api.delete(`Tonghopquatgio/${id}`).then(response => {
@@ -59,6 +71,8 @@ export const quatgioService = {
     deleteQuatgios,
     getNhatkyById,
     addNhatkyquatgio,
-    addNhatkyquatgios
+    addNhatkyquatgios,
+    deleteNhatkyQuatgios,
+    getThongsoquatgioById
 
 }

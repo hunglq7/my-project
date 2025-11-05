@@ -1,10 +1,7 @@
 import React, { Component, useEffect, useState, useRef } from 'react'
 import {
-    CCard,
-    CCardBody,
-    CCardHeader,
-    CCol,
-    CRow,
+    CCard, CCardBody, CCardHeader, CCol, CRow,
+    CButton, CForm, CFormCheck, CFormInput, CFormSelect
 } from '@coreui/react'
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -22,10 +19,12 @@ import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, Ope
 import { Button, Checkbox, Form, Input, Flex } from 'antd';
 import { InputNumber } from 'antd';
 import AppToasts from '../../components/AppToasts';
-import { CToast, CToastBody, CToaster, CToastHeader } from '@coreui/react'
+import { CToaster } from '@coreui/react'
 import { CTab, CTabContent, CTabList, CTabPanel, CTabs } from '@coreui/react'
 import { quatgioService } from '../../service/quatgioService';
 import Nhatkyquatgio from './Nhatkyquatgio';
+import Thongsoquatgio from './Thongsoquatgio';
+import { data } from 'react-router-dom';
 
 
 function Capnhatquatgio() {
@@ -110,8 +109,8 @@ function Capnhatquatgio() {
     };
 
     const onInputNumberChange = (e, name) => {
-        const val = e.value || 0;
-        console.log(val)
+        const val = e.target.value || 0;
+        console.log(e)
         let _quatgio = { ...quatgio };
 
         _quatgio[`${name}`] = val;
@@ -175,15 +174,24 @@ function Capnhatquatgio() {
         setIsSave(false);
     };
     const editQuatgio = (quatgio) => {
+        let _quatgio = quatgio;
+        let myDate = new Date(_quatgio.ngayLap)
+        let myDateString =
+            myDate.getFullYear() +
+            '-' +
+            ('0' + (myDate.getMonth() + 1)).slice(-2) +
+            '-' +
+            ('0' + myDate.getDate()).slice(-2);
+        _quatgio.ngayLap = myDateString;
         setSubmitted(true)
-        setQuatgio({ ...quatgio });
+        setQuatgio({ ..._quatgio });
         setQuatgioDialog(true);
         setIsSave(false);
     };
 
-    const onDuphongChange = (e) => {
+    const onDuphongChange = (e, name) => {
         let _quatgio = { ...quatgio };
-        _quatgio['duPhong'] = e.target.checked;
+        _quatgio[`${name}`] = e.target.checked;
         setQuatgio(_quatgio);
     };
 
@@ -221,6 +229,7 @@ function Capnhatquatgio() {
         setDeleteQuatgiosDialog(true);
     };
 
+    console.log(quatgio)
     return (
         <>
 
@@ -230,7 +239,7 @@ function Capnhatquatgio() {
                 <CCol xs={12}>
                     <CCard className="mb-4">
                         <CCardHeader>
-                            <strong>Cập nhật bảng</strong> <small>Chức vụ</small>
+                            <strong>Cập nhật bảng</strong> <small>quạt gió</small>
                         </CCardHeader>
                         <CCardBody>
                             <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
@@ -242,7 +251,7 @@ function Capnhatquatgio() {
                                 <Column field="tenThietBi" header="Thiết bị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="tenDonVi" header="Đơn vị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="viTriLapDat" header="Vị trí lắp đặt" sortable style={{ minWidth: '6rem' }}></Column>
-                                <Column field="tinhTrangThietBi" header="Tình trạng thiết bị" sortable style={{ minWidth: '6rem' }}></Column>
+                                <Column field="ngayLap" header="Ngày lắp" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="soLuong" header="SL đang dùng" sortable style={{ minWidth: '8rem' }}></Column>
                                 <Column field="duPhong" header="Tình trạng TB" body={statusBodyTemplate} sortable style={{ minWidth: '16rem' }}></Column>
                                 <Column field='hanhDong' header="Hành động" body={actionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
@@ -252,64 +261,64 @@ function Capnhatquatgio() {
                 </CCol>
             </CRow>
 
-            <Dialog visible={quatgioDialog} style={{ width: '64rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? "Sửa quạt gió" : "Cập nhật quạt gió"} modal className="p-fluid" onHide={hideDialog}>
+            <Dialog visible={quatgioDialog} style={{ width: '64rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa thiết bị: ${quatgio.tenThietBi}` : `Thêm thiết bị`} modal className="p-fluid" onHide={hideDialog}>
                 <div className='mt-2'>
                     <CTabs defaultActiveItemKey={1}>
-                        <CTabList variant="tabs" layout="fill">
-                            <CTab aria-controls="home-tab-pane" itemKey={1}>Cập nhật quạt gió</CTab>
-                            <CTab aria-controls="profile-tab-pane" itemKey={2}>Nhật ký quạt gió</CTab>
-                            <CTab aria-controls="contact-tab-pane" itemKey={3}>Thông số ký thuật</CTab>
+                        <CTabList variant="underline-border">
+                            <CTab aria-controls="Capnhat-tab-pane" itemKey={1}>Cập nhật quạt gió</CTab>
+                            <CTab hidden={!submitted} aria-controls="Nhatky-tab-pane" itemKey={2}>Nhật ký quạt gió</CTab>
+                            <CTab hidden={!submitted} aria-controls="Thongso-tab-pane" itemKey={3}>Thông số ký thuật</CTab>
 
                         </CTabList>
                         <CTabContent>
-                            <CTabPanel className="py-3 " aria-labelledby="home-tab-pane" itemKey={1}>
-                                <Form
-                                    name="basic"
-                                    labelCol={{ span: 8 }}
-                                    wrapperCol={{ span: 16 }}
-                                    style={{ maxWidth: 600 }}
-                                    initialValues={{ remember: true }}
-                                    autoComplete="off"
+                            <CTabPanel className="py-3 " aria-labelledby="Capnhat-tab-pane" itemKey={1}>
+                                <CForm className="row g-3">
+                                    <CCol md={6}>
+                                        <CFormInput value={quatgio.maQuanLy} onChange={(e) => onInputChange(e, 'maQuanLy')} type="text" id="maQuanLy" label="Mã quản lý:" />
+                                    </CCol>
+                                    <CCol md={6}>
+                                        <CFormInput value={quatgio.tenThietBi} onChange={(e) => onInputChange(e, 'tenThietBi')} type="text" id="tenThietBi" label="Thiết bị:" />
+                                    </CCol>
+                                    <CCol md={6}>
+                                        <CFormInput value={quatgio.tenDonVi} onChange={(e) => onInputChange(e, 'tenDonVi')} type="text" id="tenDonVi" label="Đơn vị:" />
+                                    </CCol>
+                                    <CCol md={12}>
+                                        <CFormInput value={quatgio.viTriLapDat} onChange={(e) => onInputChange(e, 'viTriLapDat')} type="text" id="viTriLapDat" label="Vị trí lắp đặt:" />
+                                    </CCol>
+                                    <CCol md={12}>
+                                        <CFormInput value={quatgio.tinhTrangThietBi} onChange={(e) => onInputChange(e, 'tinhTrangThietBi')} type="text" id="tinhTrangThietBi" label="Tình trạng:" />
+                                    </CCol>
+                                    <CCol md={6}>
+                                        <CFormInput value={quatgio.soLuong} onChange={(e) => onInputNumberChange(e, 'soLuong')} type="number" id="soLuong" label="Số lượng:" />
+                                    </CCol>
+                                    <CCol md={6}>
+                                        <CFormInput value={quatgio.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
+                                    </CCol>
 
-                                >
-                                    <Form.Item
-                                        label="Thiết bị"
-                                        name="tenThietBi"
-                                        rules={[{ required: true, message: 'Tên thiết bị phải nhập!' }]}
-                                    >
-                                        <Input value={quatgio.tenThietbi} onChange={(e) => onInputChange(e, 'tenThietBi')} />
-                                    </Form.Item>
+                                    <CCol md={4}>
+                                        <CFormSelect id="donVi" label="Đơn vị">
+                                            <option>Choose...</option>
+                                            <option>...</option>
+                                        </CFormSelect>
+                                    </CCol>
 
-                                    <Form.Item
-                                        label="Password"
-                                        name="password"
-                                        rules={[{ required: true, message: 'Please input your password!' }]}
-                                    >
-                                        <Input.Password />
-                                    </Form.Item>
-
-                                    <Form.Item name="soLuong" label="Số lượng" rules={[{ type: 'number', min: 0, max: 99 }]}>
-                                        <InputNumber min={1} max={10} value={quatgio.soLuong} onChange={(e) => onInputNumberChange(e, 'soLuong')} />
-                                    </Form.Item>
-
-                                    <Form.Item name="remember" valuePropName="checked" label={null}>
-                                        <Checkbox>Dự phòng</Checkbox>
-                                    </Form.Item>
-
-                                    <Form.Item label={null}>
-                                        <Button type="primary" htmlType="submit">
-                                            Submit
-                                        </Button>
-                                    </Form.Item>
-                                </Form>
+                                    <CCol xs={12}>
+                                        <CFormCheck checked={quatgio.duPhong} onChange={(e) => onDuphongChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
+                                    </CCol>
+                                    <CCol xs={12}>
+                                        <CButton color="primary" type="submit">
+                                            Lưu
+                                        </CButton>
+                                    </CCol>
+                                </CForm>
                             </CTabPanel>
-                            <CTabPanel className="py-3 " aria-labelledby="profile-tab-pane" itemKey={2}>
+                            <CTabPanel className="py-3 " aria-labelledby="Nhatky-tab-pane" itemKey={2}>
 
                                 <Nhatkyquatgio quatgio={quatgio} />
 
                             </CTabPanel>
-                            <CTabPanel className="py-3" aria-labelledby="contact-tab-pane" itemKey={3}>
-                                Thông số kỹ thuật
+                            <CTabPanel className="py-3" aria-labelledby="Thongso-tab-pane" itemKey={3}>
+                                <Thongsoquatgio quatgio={quatgio} />
                             </CTabPanel>
 
                         </CTabContent>

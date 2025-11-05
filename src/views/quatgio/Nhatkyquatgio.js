@@ -1,15 +1,24 @@
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import { quatgioService } from '../../service/quatgioService';
-import React, { Component, useEffect, useState, useRef, useMemo, useCallback, useContext } from 'react'
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { Alert, Button, Flex, Tooltip } from 'antd';
-import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
-
+import { DeleteFilled, FileAddFilled, SaveFilled } from '@ant-design/icons';
+import { CToaster } from '@coreui/react'
+import AppToasts from '../../components/AppToasts';
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 function Nhatkyquatgio({ quatgio }) {
     const gridRef = useRef(null);
     const id = quatgio.id
+    const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
+    const quatgioAddErorToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thất bại" })
+    const quatgioDeleteErorToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thất bại" })
+    const qutgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
+    const [toast, addToast] = useState()
+    const toaster = useRef(null)
+    const [isSave, setIsSave] = useState(false);
+
     useEffect(() => {
         async function fetchData() {
             try {
@@ -22,7 +31,7 @@ function Nhatkyquatgio({ quatgio }) {
             }
         }
         fetchData()
-    }, [])
+    }, [isSave])
     const [rowData, setRowData] = useState([
     ]);
 
@@ -62,14 +71,17 @@ function Nhatkyquatgio({ quatgio }) {
             field: 'viTri',
             headerName: 'Vị trí',
             editable: true,
+            cellEditor: 'agLargeTextCellEditor',
             cellEditorPopup: true,
+            cellEditorParams: {
+                maxLength: 20
+            }
         },
         {
             field: 'trangThai',
             headerName: 'Tình trạng',
             editable: true,
-            cellEditor: 'agLargeTextCellEditor',
-            cellEditorParams: { maxLength: 10000 },
+            cellEditorPopup: true,
         },
         { field: 'ghiChu', headerName: 'Ghi chú' },
 
@@ -84,7 +96,7 @@ function Nhatkyquatgio({ quatgio }) {
             ngaythang: "",
             donVi: "",
             viTri: "",
-            trangThai: true,
+            trangThai: "",
             ghiChu: ""
         };
 
@@ -103,23 +115,39 @@ function Nhatkyquatgio({ quatgio }) {
         console.log("res", res)
     }, []);
 
+
+
     const Save = useCallback(() => {
         let seletcRow = gridRef.current.api.getSelectedRows()
-        console.log("Dữ liệu khi save", seletcRow[0])
-        quatgioService.addNhatkyquatgio(seletcRow[0]).then(response => {
+        quatgioService.addNhatkyquatgios(seletcRow).then(response => {
             if (response) {
-                alert("Lưu thành công")
+                addToast(quatgioAddToast)
+                setIsSave(true)
             }
             else {
-                alert("Lưu thất bại")
+                addToast(quatgioAddErorToast)
             }
-        })
 
+        })
+        setIsSave(false)
     }, [])
 
-    const deleteRow = useCallback(() => {
+    const deleteRows = useCallback(() => {
         const seletcRow = gridRef.current.api.getSelectedRows()
-        alert(JSON.stringify(seletcRow))
+        quatgioService.deleteNhatkyQuatgios(seletcRow).then(response => {
+            if (response) {
+                gridRef.current.api.applyTransaction({
+                    remove: seletcRow,
+                });
+                addToast(qutgioDeleteToast)
+                setIsSave(true)
+            }
+            else {
+                addToast(quatgioDeleteErorToast)
+            }
+
+        })
+        setIsSave(false)
     }, [])
 
     const rowSelection = useMemo(() => {
@@ -133,14 +161,14 @@ function Nhatkyquatgio({ quatgio }) {
     return (
         <>
 
-
+            <CToaster className="p-3 z-500" placement="top-end" push={toast} ref={toaster} />
             <Flex wrap gap="small" justify='start' className='mb-2'>
-                <Button type="primary" icon={<UndoOutlined />} onClick={() => addItems()}>
-                    Add New
+                <Button type="primary" icon={<FileAddFilled />} onClick={() => addItems()}>
+                    Thêm
                 </Button>
-                <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={Save} >Save</Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteRow}>
-                    Delete
+                <Button color="primary" label="Thêm" variant="solid" icon={<SaveFilled />} onClick={Save} >Lưu</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteRows}>
+                    Xóa
                 </Button>
             </Flex>
             {/* <Button type="primary" icon={<UndoOutlined />} onClick={addNewRow}>
