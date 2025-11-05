@@ -132,8 +132,6 @@ function Nhatkyquatgio({ quatgio }) {
     const paginationPageSizeSelector = [5, 10, 20];
     return (
         <>
-
-
             <Flex wrap gap="small" justify='start' className='mb-2'>
                 <Button type="primary" icon={<UndoOutlined />} onClick={() => addItems()}>
                     Add New
@@ -143,10 +141,6 @@ function Nhatkyquatgio({ quatgio }) {
                     Delete
                 </Button>
             </Flex>
-            {/* <Button type="primary" icon={<UndoOutlined />} onClick={addNewRow}>
-                    Add New
-                </Button> */}
-
 
             <div style={{ height: 500 }}>
                 <AgGridReact
