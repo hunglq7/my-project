@@ -44,7 +44,7 @@ const Capnhatdanhmucquatgio = () => {
         fetchData();
     }, [isSave])
 
-    const fetchData = useCallback(async () => {
+    const fetchData = async () => {
         try {
             await quatgioService.getDanhmucquatgio().then(response => {
                 setRowData(response.data)
@@ -53,7 +53,7 @@ const Capnhatdanhmucquatgio = () => {
         } catch (error) {
             console.log(error)
         }
-    }, [])
+    }
 
     function createNewRowData() {
         const newData = {
