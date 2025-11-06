@@ -85,7 +85,11 @@ const _nav = [
         name: 'Cập nhật quạt gió',
         to: '/quatgio/capnhatquatgio',
       },
-
+      {
+        component: CNavItem,
+        name: 'Danh mục quạt gió',
+        to: '/quatgio/danhmucquatgio',
+      },
 
     ],
   },

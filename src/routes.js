@@ -12,6 +12,7 @@ const Product = React.lazy(() => import('./views/danhmuc/product/Product'))
 const Maycao = React.lazy(() => import('./views/maycao/Capnhatmaycao'))
 //Quạt gió
 const Quatgio = React.lazy(() => import('./views/quatgio/Capnhatquatgio'))
+const DanhmucQuatgio = React.lazy(() => import('./views/quatgio/Capnhatdanhmucquatgio'))
 // Base
 const Accordion = React.lazy(() => import('./views/base/accordion/Accordion'))
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'))
@@ -110,6 +111,7 @@ const routes = [
   { path: '/product/product', name: 'Sản phẩm', element: Product },
   { path: '/maycao/capnhatmaycao', name: 'Cập nhật máy cào', element: Maycao },
   { path: '/quatgio/capnhatquatgio', name: 'Cập nhật quạt gió', element: Quatgio },
+  { path: '/quatgio/danhmucquatgio', name: 'Danh mục quạt gió', element: DanhmucQuatgio },
 ]
 
 export default routes

@@ -25,7 +25,7 @@ const getThongsoquatgioById = async (id) => {
 }
 
 const addNhatkyquatgios = async (datas) => {
-    console.log("Dữ liệu api", datas)
+
     return await api.put(`Nhatkyquatgio/UpdateMultiple`, datas).then(response => {
         return response
     })
@@ -53,6 +53,30 @@ const addNhatkyquatgio = async (data) => {
 
 }
 
+const addTonghopquatgio = async (data) => {
+    return api.post(`Tonghopquatgio/create`, data).then(response => {
+        return response
+    })
+}
+const updateTonghopquatgio = async (data) => {
+    return api.put(`Tonghopquatgio/update`, data).then(response => {
+        return response
+    })
+}
+
+const updateDanhmucquatgios = async (data) => {
+    return api.put(`Danhmucquatgio/UpdateMultiple`, data).then(response => {
+        return response
+    })
+}
+
+const deleteDanhmucquatgios = async (data) => {
+    return api.put(`Danhmucquatgio/DeleteMultipale`, data).then(response => {
+        return response
+    })
+}
+
+
 const deleteNhatkyQuatgios = async (datas) => {
     return await api.post(`Nhatkyquatgio/DeleteMultipale`, datas).then(response => {
         return response
@@ -71,6 +95,12 @@ const deleteQuatgios = async (datas) => {
         return response
     })
 }
+
+const getDanhmucquatgio = async () => {
+    return await api.get('Danhmucquatgio').then((response) => {
+        return response
+    });
+};
 export const quatgioService = {
     getQuatgio,
     getQuatgioById,
@@ -80,6 +110,11 @@ export const quatgioService = {
     addNhatkyquatgio,
     addNhatkyquatgios,
     deleteNhatkyQuatgios,
-    getThongsoquatgioById
+    getThongsoquatgioById,
+    getDanhmucquatgio,
+    addTonghopquatgio,
+    updateTonghopquatgio,
+    updateDanhmucquatgios,
+    deleteDanhmucquatgios
 
 }

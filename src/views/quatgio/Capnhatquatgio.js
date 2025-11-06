@@ -1,4 +1,4 @@
-import React, { Component, useEffect, useState, useRef, useCallback } from 'react'
+import React, { Component, useEffect, useState, useRef, useCallback, memo } from 'react'
 import {
     CCard, CCardBody, CCardHeader, CCol, CRow,
     CButton, CForm, CFormCheck, CFormInput, CFormSelect
@@ -29,30 +29,37 @@ import Thongsoquatgio from './Thongsoquatgio';
 import moment from 'moment';
 
 function Capnhatquatgio() {
-    const newDate = new Date();
+    const myDate = () => {
+        const date = memo(new Date()).formatDate("dd/mm/yyyy")
+        console.log(date)
+        return date
+    }
+
     let emptyQuatgio = {
         id: 0,
         maQuanLy: '',
         quatGioId: '',
         donViId: 0,
         viTriLapDat: '',
-        ngayLap: { newDate },
+        ngayLap: { myDate },
         soLuong: 1,
         tinhTrangThietBi: '',
-        duPhong: true,
+        duPhong: false,
         ghiChu: ''
     };
     const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
     const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
-    const qutgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
+    const quatgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
     const quatgiosDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
     const [quatgios, setQuatgios] = useState([]);
     const [donvis, setDonvis] = useState([]);
+    const [danhmucquatgios, setDanhmucquatgios] = useState([]);
     const [quatgioDialog, setQuatgioDialog] = useState(false);
     const [deleteQuatgioDialog, setDeleteQuatgioDialog] = useState(false);
     const [deleteQuatgiosDialog, setDeleteQuatgiosDialog] = useState(false);
     const [quatgio, setQuatgio] = useState(emptyQuatgio);
     const [quatgioId, setQuatgioId] = useState(null);
+    const [tenthietbi, setTenthietbi] = useState(null);
     const [selectedQuatgios, setSelectedQuatgios] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
@@ -62,18 +69,20 @@ function Capnhatquatgio() {
     const dt = useRef(null);
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                await quatgioService.getQuatgio().then(response => {
-                    setQuatgios(response.data)
-                })
-            } catch (error) {
-                console.log(error)
-            }
-        }
         fetchData();
-        getDonvis()
+        getDonvis();
+        getDanhmucquatgios()
     }, [isSave])
+
+    const fetchData = useCallback(async () => {
+        try {
+            await quatgioService.getQuatgio().then(response => {
+                setQuatgios(response.data)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
 
     const getDonvis = useCallback(async () => {
         try {
@@ -84,28 +93,49 @@ function Capnhatquatgio() {
             console.log(error)
         }
     }, [])
-    const leftToolbarTemplate = () => {
-        return (
-            <Flex wrap gap="small">
-                <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedQuatgios || !selectedQuatgios.length}  > Xóa</Button>
-            </Flex>
-        );
+    const getDanhmucquatgios = useCallback(async () => {
+        try {
+            await quatgioService.getDanhmucquatgio().then(response => {
+                setDanhmucquatgios(response.data)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }, [])
+
+    const openNew = () => {
+        setQuatgioId(0);
+        setQuatgio(emptyQuatgio);
+        setSubmitted(false);
+        setQuatgioDialog(true);
+        setIsSave(false);
     };
 
-    const rightToolbarTemplate = () => {
-        return <Button color="cyan" variant="solid" icon={<DownloadOutlined />} onClick={exportCSV} >Export</Button>;
+    const editQuatgio = (rowData) => {
+        const id = rowData.id;
+        const idCanTim = rowData.quatGioId;
+        let ketQua = null;
+        for (let i = 0; i < quatgios.length; i++) {
+            console.log("Danh sách cần tìm:", quatgios[i])
+            if (quatgios[i].quatGioId === idCanTim) {
+                ketQua = quatgios[i].tenThietBi;
+                break; // dừng vòng lặp khi tìm thấy
+            }
+        }
+        if (ketQua) {
+            setTenthietbi(ketQua)
+        } else {
+            console.log("Không tìm thấy bản ghi có id =", idCanTim);
+        }
+
+
+        getQuatgioById(id);
+        setQuatgioId(id);
+        setSubmitted(true);
+        setQuatgioDialog(true);
+        setIsSave(false);
     };
-    const actionBodyTemplate = (rowData) => {
-        return (
-            <React.Fragment>
-                <Flex wrap gap="small">
-                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => editQuatgio(rowData)} />
-                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDeleteQuatgio(rowData)} />
-                </Flex>
-            </React.Fragment>
-        );
-    };
+
     const onDeleteQuatgio = () => {
         let id = quatgio.id;
         quatgioService.deleteQuatgio(id).then(response => {
@@ -118,6 +148,33 @@ function Capnhatquatgio() {
         setDeleteQuatgioDialog(false);
         setQuatgio(emptyQuatgio);
     };
+
+    const onSave = () => {
+        const _quatgio = quatgio;
+        if (submitted) {
+            //Update
+            quatgioService.updateTonghopquatgio(_quatgio).then(response => {
+                if (response) {
+                    setIsSave(true)
+                    addToast(quatgioUpdateToast)
+                }
+            })
+
+        }
+        else {
+            //Thêm mới
+            quatgioService.addTonghopquatgio(_quatgio).then(response => {
+                if (response) {
+                    setIsSave(true)
+                    addToast(quatgioAddToast)
+                }
+            })
+
+        }
+        setQuatgioDialog(false)
+        setSelectedQuatgios(null)
+        setIsSave(false)
+    }
 
     const onInputChange = (e, name) => {
         const val = (e.target && e.target.value) || '';
@@ -160,51 +217,12 @@ function Capnhatquatgio() {
         dt.current.exportCSV();
     };
 
-    const header = (
-        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-            <IconField iconPosition="left">
-                <InputIcon className="pi pi-search" />
-                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
-            </IconField>
-        </div>
-    );
-    const deleteQuatgioDialogFooter = (
-        <Flex wrap gap="small" justify='end'>
-            <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteQuatgioDialog(false)}>
-                No
-            </Button>
-            <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={onDeleteQuatgio}>
-                Yes
-            </Button>
-        </Flex>
 
-    );
 
-    const deleteQuatgiosDialogFooter = (
-        <React.Fragment>
-            <Flex wrap gap="small" justify='end'>
-                <Button type="primary" icon={<UndoOutlined />} onClick={() => setDeleteQuatgiosDialog(false)}>
-                    No
-                </Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelectedQuatgios}>
-                    Yes
-                </Button>
-            </Flex>
-        </React.Fragment>
-    );
-    const openNew = () => {
-        setQuatgio(emptyQuatgio);
-        setSubmitted(false);
-        setQuatgioDialog(true);
-        setIsSave(false);
-    };
 
-    const editQuatgio = (rowData) => {
-        const id = rowData.id;
-        setQuatgioId(id)
+    const getQuatgioById = useCallback((id) => {
         quatgioService.getQuatgioById(id).then(response => {
             if (response) {
-
                 const _quatgio = response.data;
                 const _ngayLap = _quatgio.ngayLap;
                 const date = moment(_ngayLap).format("YYYY-MM-DD");
@@ -215,10 +233,11 @@ function Capnhatquatgio() {
                 console.log("Lỗi lấy dữ liệu chi tiết quạt gió theo id")
             }
         })
-        setSubmitted(true)
-        setQuatgioDialog(true);
-        setIsSave(false);
-    };
+    }, [])
+
+
+
+
 
     const onDuphongChange = (e, name) => {
         let _quatgio = { ...quatgio };
@@ -243,13 +262,16 @@ function Capnhatquatgio() {
 
     const hideDeleteQuatgioDialog = () => {
         setDeleteQuatgioDialog(false);
+        setSelectedQuatgios(null)
     };
     const hideDeleteQuatgiosDialog = () => {
         setDeleteQuatgiosDialog(false);
+        setSelectedQuatgios(null)
     };
     const hideDialog = () => {
         setSubmitted(false);
         setQuatgioDialog(false);
+        setSelectedQuatgios(null);
     };
     const confirmDeleteQuatgio = (quatgio) => {
         setQuatgio(quatgio);
@@ -260,8 +282,63 @@ function Capnhatquatgio() {
         setDeleteQuatgiosDialog(true);
     };
 
-    console.log(quatgio)
-    console.log(donvis)
+    const leftToolbarTemplate = () => {
+        return (
+            <Flex wrap gap="small">
+                <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedQuatgios || !selectedQuatgios.length}  > Xóa</Button>
+            </Flex>
+        );
+    };
+
+    const rightToolbarTemplate = () => {
+        return <Button color="cyan" variant="solid" icon={<DownloadOutlined />} onClick={exportCSV} >Export</Button>;
+    };
+    const actionBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                <Flex wrap gap="small">
+                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => editQuatgio(rowData)} />
+                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDeleteQuatgio(rowData)} />
+                </Flex>
+            </React.Fragment>
+        );
+    };
+
+    const header = (
+        <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+            <IconField iconPosition="left">
+                <InputIcon className="pi pi-search" />
+                <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Search..." />
+            </IconField>
+        </div>
+    );
+    const deleteQuatgioDialogFooter = (
+        <Flex wrap gap="small" justify='end'>
+            <Button type="primary" icon={<UndoOutlined />} onClick={hideDeleteQuatgioDialog}>
+                No
+            </Button>
+            <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={onDeleteQuatgio}>
+                Yes
+            </Button>
+        </Flex>
+
+    );
+
+    const deleteQuatgiosDialogFooter = (
+        <React.Fragment>
+            <Flex wrap gap="small" justify='end'>
+                <Button type="primary" icon={<UndoOutlined />} onClick={hideDeleteQuatgiosDialog}>
+                    No
+                </Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelectedQuatgios}>
+                    Yes
+                </Button>
+            </Flex>
+        </React.Fragment>
+    );
+
+
     return (
         <>
 
@@ -274,6 +351,7 @@ function Capnhatquatgio() {
                             <strong>Cập nhật bảng</strong> <small>quạt gió</small>
                         </CCardHeader>
                         <CCardBody>
+
                             <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
                             <DataTable ref={dt} size='normal' stripedRows rowHover value={quatgios} dataKey="id" selection={selectedQuatgios} onSelectionChange={(e) => setSelectedQuatgios(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
@@ -293,7 +371,7 @@ function Capnhatquatgio() {
                 </CCol>
             </CRow>
 
-            <Dialog visible={quatgioDialog} style={{ width: '64rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa thiết bị: ${quatgio.tenThietBi}` : `Thêm thiết bị`} modal className="p-fluid" onHide={hideDialog}>
+            <Dialog visible={quatgioDialog} style={{ width: '64rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa thiết bị: ${tenthietbi}` : `Thêm thiết bị`} modal className="p-fluid" onHide={hideDialog}>
                 <div className='mt-2'>
                     <CTabs defaultActiveItemKey={1}>
                         <CTabList variant="underline-border">
@@ -306,14 +384,40 @@ function Capnhatquatgio() {
                             <CTabPanel className="py-3 " aria-labelledby="Capnhat-tab-pane" itemKey={1}>
                                 <CForm className="row g-3 ">
                                     <CCol md={6}>
-                                        <CFormInput value={quatgio.id} onChange={(e) => onInputChange(e, 'id')} type="text" id="maQuanLy" label="Mã quản lý:" />
+                                        <CFormInput disabled={true} value={quatgio.id} onChange={(e) => onInputChange(e, 'id')} type="text" id="maQuanLy" label="id:" />
                                     </CCol>
                                     <CCol md={6}>
                                         <CFormInput value={quatgio.maQuanLy} onChange={(e) => onInputChange(e, 'maQuanLy')} type="text" id="maQuanLy" label="Mã quản lý:" />
                                     </CCol>
                                     <CCol md={6}>
-                                        <CFormInput value={quatgio.tenThietBi} onChange={(e) => onInputChange(e, 'tenThietBi')} type="text" id="tenThietBi" label="Thiết bị:" />
+                                        <div >
+                                            <label className="form-label">Đơn vị:</label>
+                                            <select className='form-select' id="donViId" value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} label="Đơn vị">
+                                                <option value="">--Chọn đơn vị--</option> {/* Optional placeholder */}
+                                                {donvis.map((option) => (
+                                                    <option key={option.id} value={option.id}>
+                                                        {option.tenPhong}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
                                     </CCol>
+                                    <CCol md={6}>
+                                        <div >
+                                            <label className="form-label">Thiết bị:</label>
+                                            <select className='form-select' id="quatGioId" value={quatgio.quatGioId} onChange={(e) => onInputChange(e, 'quatGioId')} >
+                                                <option value="">--Chọn thiết bị--</option> {/* Optional placeholder */}
+                                                {danhmucquatgios.map((option) => (
+                                                    < option key={option.id} value={option.id} >
+                                                        {option.tenThietBi}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                    </CCol>
+
 
                                     <CCol md={12}>
                                         <CFormInput value={quatgio.viTriLapDat} onChange={(e) => onInputChange(e, 'viTriLapDat')} type="text" id="viTriLapDat" label="Vị trí lắp đặt:" />
@@ -327,52 +431,16 @@ function Capnhatquatgio() {
                                     <CCol md={6}>
                                         <CFormInput value={quatgio.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
                                     </CCol>
-                                    <CFormSelect value={donvis.donViId} onChange={(e) => onInputChange(e, 'donViId')}>
-                                        {donvis.map((items) => {
-                                            <options key={items.id} value={items.id}>
-                                                {items.tenPhong}
-                                            </options>
-                                        })}
-                                    </CFormSelect>
-
-                                    <CFormSelect
-                                        aria-label="Default select example"
-
-
-                                        options={[
-                                            { label: 'Open this select menu' },
-                                            { label: 'One', value: '1' },
-                                            { label: 'Two', value: '2' },
-                                            { label: 'Three', value: '3', disabled: true },
-                                        ]}
-                                    />
-
-                                    <CCol md={6}>
-                                        {/* <div className="card flex justify-content-center">
-                                            <Dropdown size="small" value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} options={donvis} optionLabel="tenPhong"
-                                                placeholder="Chọn đơn vị" className="w-full md:w-14rem" />
-                                        </div> */}
-                                        <select value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} >
-                                            {donvis.map((items, index) => {
-                                                <option key={index} value={items.id}>{items.tenPhong}</option>
-                                            })}
-                                        </select>
-
-
-                                    </CCol>
-
                                     <CCol md={12}>
                                         <CFormCheck checked={quatgio.duPhong} onChange={(e) => onDuphongChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
                                     </CCol>
                                     <CCol xs={12}>
-                                        {/* <CButton color="primary" type="submit">
-                                            Lưu
-                                        </CButton> */}
-                                        <Flex wrap gap="small" justify='start'>
-                                            <Button type="primary" icon={<SaveFilled />} >
+
+                                        <Flex wrap gap="small" justify='start' className='mt-3'>
+                                            <Button type="primary" icon={<SaveFilled />} onClick={onSave}>
                                                 Lưu
                                             </Button>
-                                            <Button color="danger" variant="solid" icon={<UndoOutlined />} type="submit" >
+                                            <Button color="danger" variant="outlined" icon={<UndoOutlined />} onClick={hideDialog}>
                                                 Không
                                             </Button>
                                         </Flex>
@@ -392,14 +460,14 @@ function Capnhatquatgio() {
                     </CTabs>
 
                 </div>
-            </Dialog>
+            </Dialog >
 
             <Dialog visible={deleteQuatgioDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteQuatgioDialogFooter} onHide={hideDeleteQuatgioDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                     {quatgio && (
                         <span>
-                            Bạn có chắc chắn muốn xóa <b>{quatgio.tenThietbi}</b>?
+                            Bạn có chắc chắn muốn xóa <b>{quatgio.maQuanLy}</b>?
                         </span>
                     )}
 
