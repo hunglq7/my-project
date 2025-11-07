@@ -93,6 +93,7 @@ function Capnhatquatgio() {
             console.log(error)
         }
     }, [])
+
     const getDanhmucquatgios = useCallback(async () => {
         try {
             await quatgioService.getDanhmucquatgio().then(response => {
@@ -128,13 +129,27 @@ function Capnhatquatgio() {
             console.log("Không tìm thấy bản ghi có id =", idCanTim);
         }
 
-
         getQuatgioById(id);
         setQuatgioId(id);
         setSubmitted(true);
         setQuatgioDialog(true);
         setIsSave(false);
     };
+
+    const getQuatgioById = useCallback((id) => {
+        quatgioService.getQuatgioById(id).then(response => {
+            if (response) {
+                const _quatgio = response.data;
+                const _ngayLap = _quatgio.ngayLap;
+                const date = moment(_ngayLap).format("YYYY-MM-DD");
+                _quatgio.ngayLap = date;
+                setQuatgio({ ..._quatgio })
+            }
+            else {
+                console.log("Lỗi lấy dữ liệu chi tiết quạt gió theo id")
+            }
+        })
+    }, [])
 
     const onDeleteQuatgio = () => {
         let id = quatgio.id;
@@ -216,27 +231,6 @@ function Capnhatquatgio() {
     const exportCSV = () => {
         dt.current.exportCSV();
     };
-
-
-
-
-    const getQuatgioById = useCallback((id) => {
-        quatgioService.getQuatgioById(id).then(response => {
-            if (response) {
-                const _quatgio = response.data;
-                const _ngayLap = _quatgio.ngayLap;
-                const date = moment(_ngayLap).format("YYYY-MM-DD");
-                _quatgio.ngayLap = date;
-                setQuatgio({ ..._quatgio })
-            }
-            else {
-                console.log("Lỗi lấy dữ liệu chi tiết quạt gió theo id")
-            }
-        })
-    }, [])
-
-
-
 
 
     const onDuphongChange = (e, name) => {

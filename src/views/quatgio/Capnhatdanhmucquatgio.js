@@ -4,19 +4,15 @@ import { quatgioService } from '../../service/quatgioService';
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { Button, Flex } from 'antd';
 import { DeleteFilled, FileAddFilled, SaveFilled } from '@ant-design/icons'
-import { CToaster } from '@coreui/react'
-import AppToasts from '../../components/AppToasts';
+import { Toast } from 'primereact/toast';
+import 'primeicons/primeicons.css';
+import 'primereact/resources/primereact.css';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 const Capnhatdanhmucquatgio = () => {
-
+    const toast = useRef(null);
     const gridRef = useRef(null);
-    const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
-    const quatgioAddErorToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thất bại" })
-    const quatgioDeleteErorToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thất bại" })
-    const qutgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
-    const [toast, addToast] = useState()
-    const toaster = useRef(null)
     const [isSave, setIsSave] = useState(false);
     const [rowData, setRowData] = useState([]);
     const [colDefs, setColDefs] = useState([
@@ -48,7 +44,6 @@ const Capnhatdanhmucquatgio = () => {
         try {
             await quatgioService.getDanhmucquatgio().then(response => {
                 setRowData(response.data)
-                console.log("data:", response.data)
             })
         } catch (error) {
             console.log(error)
@@ -87,11 +82,11 @@ const Capnhatdanhmucquatgio = () => {
         let seletcRow = gridRef.current.api.getSelectedRows()
         quatgioService.updateDanhmucquatgios(seletcRow).then(response => {
             if (response) {
-                addToast(quatgioAddToast)
+                toast.current.show({ severity: 'success', summary: 'Success', detail: `Lưu thành công ${response.data} bản ghi`, life: 3000 });
                 setIsSave(true)
             }
             else {
-                addToast(quatgioAddErorToast)
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Lưu bản ghi thất bại', life: 3000 });
             }
         })
         setIsSave(false)
@@ -104,14 +99,16 @@ const Capnhatdanhmucquatgio = () => {
                 gridRef.current.api.applyTransaction({
                     remove: seletcRow,
                 });
-                addToast(qutgioDeleteToast)
+
+                toast.current.show({ severity: 'success', summary: 'Success', detail: `Xóa thành công ${response.data} bản ghi`, life: 3000 });
                 setIsSave(true)
             }
             else {
-                addToast(quatgioDeleteErorToast)
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Xóa bản ghi thất bại', life: 3000 });
             }
 
         })
+
         setIsSave(false)
     }, [])
 
@@ -121,11 +118,11 @@ const Capnhatdanhmucquatgio = () => {
         };
     }, []);
     const pagination = true;
-    const paginationPageSize = 10;
-    const paginationPageSizeSelector = [5, 10, 20];
+    const paginationPageSize = 5000;
+    const paginationPageSizeSelector = [10, 20, 50];
     return (
         <>
-            <CToaster className="p-3 z-500" placement="top-end" push={toast} ref={toaster} />
+            <Toast ref={toast} />
             <Flex wrap gap="small" justify='start' className='mb-2'>
                 <Button type="primary" icon={<FileAddFilled />} onClick={() => addItems()}>
                     Thêm
@@ -136,8 +133,8 @@ const Capnhatdanhmucquatgio = () => {
                 </Button>
             </Flex>
 
-            <div style={{ height: 600 }}>
-                <AgGridReact
+            <div style={{ height: 800 }}>
+                <AgGridReact className='ag-theme-quartz'
                     ref={gridRef}
                     rowData={rowData}
                     columnDefs={colDefs}
@@ -146,6 +143,7 @@ const Capnhatdanhmucquatgio = () => {
                     pagination={pagination}
                     paginationPageSize={paginationPageSize}
                     paginationPageSizeSelector={paginationPageSizeSelector}
+                    animateRows={true}
                 />
             </div>
         </>

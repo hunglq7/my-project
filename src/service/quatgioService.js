@@ -18,11 +18,6 @@ const getNhatkyById = async (id) => {
     })
 }
 
-const getThongsoquatgioById = async (id) => {
-    return await api.get(`Thongsokythuatmayxuc/DetailById/${id}`).then(response => {
-        return response
-    })
-}
 
 const addNhatkyquatgios = async (datas) => {
 
@@ -71,7 +66,7 @@ const updateDanhmucquatgios = async (data) => {
 }
 
 const deleteDanhmucquatgios = async (data) => {
-    return api.put(`Danhmucquatgio/DeleteMultipale`, data).then(response => {
+    return api.post(`Danhmucquatgio/DeleteMultipale`, data).then(response => {
         return response
     })
 }
@@ -101,6 +96,40 @@ const getDanhmucquatgio = async () => {
         return response
     });
 };
+const getThongsoquatgio = async () => {
+    return await api.get('Thongsoquatgio').then((response) => {
+        return response
+    });
+};
+
+
+const addThongsoquatgio = async (data) => {
+    return api.post(`Thongsoquatgio/create`, data).then(response => {
+        return response
+    })
+}
+const updateThongsoquatgio = async (data) => {
+    return api.put(`Thongsoquatgio/update`, data).then(response => {
+        return response
+    })
+}
+const deleteThongsoquatgio = async (id) => {
+    return api.delete(`Thongsoquatgio/${id}`).then(response => {
+        return response
+    })
+}
+
+const deleteSelectThongsoquatgio = async (data) => {
+    return api.put(`Thongsoquatgio/update`, data).then(response => {
+        return response
+    })
+}
+const getThongsoquatgioById = async (id) => {
+    return await api.get(`Thongsoquatgio/DetailById/${id}`).then(response => {
+        return response
+    })
+}
+
 export const quatgioService = {
     getQuatgio,
     getQuatgioById,
@@ -115,6 +144,10 @@ export const quatgioService = {
     addTonghopquatgio,
     updateTonghopquatgio,
     updateDanhmucquatgios,
-    deleteDanhmucquatgios
-
+    deleteDanhmucquatgios,
+    getThongsoquatgio,
+    addThongsoquatgio,
+    updateThongsoquatgio,
+    deleteThongsoquatgio,
+    deleteSelectThongsoquatgio,
 }
