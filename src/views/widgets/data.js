@@ -7,6 +7,9 @@ import capdien from '../../assets/images/thietbi/capdien.png'
 import aptomat from '../../assets/images/thietbi/Ap-to-mat.png'
 import maykhoan from '../../assets/images/thietbi/Maykhoan.jpg'
 import khoidongtu from '../../assets/images/thietbi/khoi-dong-tu.jpg'
+import { useDispatch, useSelector } from 'react-redux'
+const data = useSelector((state) => state.quatgios.data)
+console.log("Data:", data)
 export const myData = [
     {
         image: bomnuoc,

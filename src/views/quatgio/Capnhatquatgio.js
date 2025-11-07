@@ -27,7 +27,8 @@ import { donviService } from '../../service/donviService';
 import Nhatkyquatgio from './Nhatkyquatgio';
 import Thongsoquatgio from './Thongsoquatgio';
 import moment from 'moment';
-
+import { useDispatch, useSelector } from 'react-redux'
+import { readAllQuatgio } from '../../reducer/quatgioSlice';
 function Capnhatquatgio() {
     const myDate = () => {
         const date = memo(new Date()).formatDate("dd/mm/yyyy")
@@ -47,6 +48,7 @@ function Capnhatquatgio() {
         duPhong: false,
         ghiChu: ''
     };
+    const data = useSelector((state) => state.quatgios.data)
     const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
     const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const quatgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
@@ -67,9 +69,10 @@ function Capnhatquatgio() {
     const [toast, addToast] = useState()
     const toaster = useRef(null)
     const dt = useRef(null);
-
+    const dispatch = useDispatch()
     useEffect(() => {
         fetchData();
+        setQuatgios(data)
         getDonvis();
         getDanhmucquatgios()
     }, [isSave])
@@ -77,6 +80,7 @@ function Capnhatquatgio() {
     const fetchData = useCallback(async () => {
         try {
             await quatgioService.getQuatgio().then(response => {
+                dispatch(readAllQuatgio(response.data))
                 setQuatgios(response.data)
             })
         } catch (error) {

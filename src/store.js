@@ -1,4 +1,6 @@
-import { legacy_createStore as createStore } from 'redux'
+
+import { configureStore } from '@reduxjs/toolkit'
+import quatgioReducer from '../src/reducer/quatgioSlice'
 const initialState = {
   sidebarShow: true,
   theme: 'light',
@@ -12,5 +14,10 @@ const changeState = (state = initialState, { type, ...rest }) => {
       return state
   }
 }
-const store = createStore(changeState)
+const store = configureStore({
+  reducer: {
+    Apps: changeState,
+    quatgios: quatgioReducer
+  }
+})
 export default store
