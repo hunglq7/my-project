@@ -22,13 +22,13 @@ import { InputNumber } from 'antd';
 import AppToasts from '../../components/AppToasts';
 import { CToaster } from '@coreui/react'
 import { CTab, CTabContent, CTabList, CTabPanel, CTabs } from '@coreui/react'
-import { quatgioService } from '../../service/quatgioService';
 import { donviService } from '../../service/donviService';
 import Nhatkyquatgio from './Nhatkyquatgio';
 import Thongsoquatgio from './Thongsoquatgio';
 import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux'
 import { readAllQuatgio } from '../../reducer/quatgioSlice';
+import { tonghopquatgioService as quatgioService } from '../../service/quatgio/tonghopquatgioService';
 function Capnhatquatgio() {
     const myDate = () => {
         const date = memo(new Date()).formatDate("dd/mm/yyyy")
@@ -48,12 +48,11 @@ function Capnhatquatgio() {
         duPhong: false,
         ghiChu: ''
     };
-    const data = useSelector((state) => state.quatgios.data)
+    const quatgios = useSelector((state) => state.quatgios.data)
     const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
     const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const quatgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
     const quatgiosDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
-    const [quatgios, setQuatgios] = useState([]);
     const [donvis, setDonvis] = useState([]);
     const [danhmucquatgios, setDanhmucquatgios] = useState([]);
     const [quatgioDialog, setQuatgioDialog] = useState(false);
@@ -72,17 +71,13 @@ function Capnhatquatgio() {
     const dispatch = useDispatch()
     useEffect(() => {
         fetchData();
-        setQuatgios(data)
         getDonvis();
         getDanhmucquatgios()
     }, [isSave])
 
     const fetchData = useCallback(async () => {
         try {
-            await quatgioService.getQuatgio().then(response => {
-                dispatch(readAllQuatgio(response.data))
-                setQuatgios(response.data)
-            })
+            dispatch(readAllQuatgio());
         } catch (error) {
             console.log(error)
         }

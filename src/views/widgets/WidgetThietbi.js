@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { CButton, CCard, CCardBody, CCardImage, CCardTitle, CCol } from '@coreui/react'
+import { CButton, CCard, CCardBody, CCardImage, CCardTitle, CCol, CBadge } from '@coreui/react'
 
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -16,7 +16,9 @@ const WidgetThietbi = ({ image, title, desc, sl, url }) => {
                         <CCardTitle>{title}</CCardTitle>
                         <div className='d-flex justify-content-between'>
                             <p>{desc}</p>
-                            <strong > {sl}</strong>
+                            <strong >
+                                <CBadge color="danger">{sl}</CBadge>
+                            </strong>
                         </div>
 
                         <Link to={url}>

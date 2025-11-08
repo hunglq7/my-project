@@ -7,64 +7,71 @@ import capdien from '../../assets/images/thietbi/capdien.png'
 import aptomat from '../../assets/images/thietbi/Ap-to-mat.png'
 import maykhoan from '../../assets/images/thietbi/Maykhoan.jpg'
 import khoidongtu from '../../assets/images/thietbi/khoi-dong-tu.jpg'
-import { useDispatch, useSelector } from 'react-redux'
-const data = useSelector((state) => state.quatgios.data)
-console.log("Data:", data)
+
+
 export const myData = [
     {
         image: bomnuoc,
+        name: "bomnuoc",
         title: "Bơm nước",
         desc: "Tổng số thiết bị",
         url: "/quatgio/capnhatquatgio",
-        sl: "150"
+        sl: null
     },
     {
         image: maycao,
+        name: "maycao",
         title: "Máy cào",
         desc: "Tổng số thiết bị",
         url: "/maycao/capnhatmaycao",
-        sl: "150"
+        sl: null
     },
     {
         image: bangtai,
+        name: "bangtai",
         title: "Băng tải",
         desc: "Tổng số thiết bị",
         url: "/bangtai/capnhatbangtai",
-        sl: "150"
+        sl: null
     },
     {
         image: bienap,
+        name: "bangtai",
         title: "Biến áp",
         desc: "Tổng số thiết bị",
         url: "/bienap/capnhatbienap",
-        sl: "150"
+        sl: null
     },
     {
         image: capdien,
+        name: "capdien",
         title: "Cáp điện",
         desc: "Tổng số thiết bị",
         url: "/capdien/capnhatcapdien",
-        sl: "150"
+        sl: null
     },
     {
         image: aptomat,
+        name: "aptomat",
         title: "Áp to mát",
         desc: "Tổng số thiết bị",
         url: "/aptomat/capnhataptomat",
-        sl: "150"
+        sl: null
     },
     {
         image: maykhoan,
+        name: "maykhoan",
         title: "Máy khoan",
         desc: "Tổng số thiết bị",
         url: "/maykhoan/capnhatmaykhoan",
-        sl: "150"
+        sl: null
     },
     {
         image: khoidongtu,
+        name: "khoidongtu",
         title: "Khởi động từ",
         desc: "Tổng số thiết bị",
         url: "/khoidongtu/capnhatkhoidongtu",
-        sl: "150"
+        sl: null
     },
 ];

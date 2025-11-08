@@ -15,8 +15,8 @@ import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import { DeleteFilled, EditFilled, SaveFilled, UndoOutlined, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
 import { Button, Flex } from 'antd';
 import { Toast } from 'primereact/toast';
-import { quatgioService } from '../../service/quatgioService';
-
+import { thongsoquatgioService as quatgioService } from '../../service/quatgio/thongsoquatgioService';
+import { danhmucquatgioService as danhmucService } from '../../service/quatgio/danhmucquatgioService';
 const Capnhatthongsoquatgio = () => {
     let emptyThongsoquatgio = {
         id: 0,
@@ -42,7 +42,7 @@ const Capnhatthongsoquatgio = () => {
     useEffect(() => {
         fetchData();
         getDanhmucquatgios()
-    }, [isSave])
+    }, [])
 
     async function fetchData() {
         try {
@@ -56,7 +56,7 @@ const Capnhatthongsoquatgio = () => {
 
     const getDanhmucquatgios = useCallback(async () => {
         try {
-            await quatgioService.getDanhmucquatgio().then(response => {
+            await danhmucService.getDanhmucquatgio().then(response => {
                 setDanhmucquatgios(response.data)
             })
         } catch (error) {
@@ -214,7 +214,7 @@ const Capnhatthongsoquatgio = () => {
     const deleteThongsoquatgiosDialogFooter = (
         <React.Fragment>
             <Flex wrap gap="small" justify='end'>
-                <Button type="primary" icon={<UndoOutlined />} onClick={setDeleteThongsoquatgiosDialog}>
+                <Button type="primary" icon={<UndoOutlined />} onClick={setDeleteThongsoquatgiosDialog(false)}>
                     No
                 </Button>
                 <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelected}>
@@ -226,7 +226,7 @@ const Capnhatthongsoquatgio = () => {
 
     const thongsoquatgioDialogFooter = (
         <Flex wrap gap="small" justify='end'>
-            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={setDeleteThongsoquatgioDialog}>
+            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={setDeleteThongsoquatgioDialog(false)}>
                 Close
             </Button>
             <Button color="primary" variant="solid" icon={<SaveFilled />} onClick={save}>

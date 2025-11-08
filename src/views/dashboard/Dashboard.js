@@ -1,83 +1,59 @@
-import React from 'react'
-import bomnuoc from '../../assets/images/thietbi/Bomnuoc.jpg'
-import maycao from '../../assets/images/thietbi/mangcao-sgb.jpg'
-import bangtai from '../../assets/images/thietbi/Bang-tai.jpg'
-import bienap from '../../assets/images/thietbi/Bienap.jpg'
-import capdien from '../../assets/images/thietbi/capdien.png'
-import aptomat from '../../assets/images/thietbi/Ap-to-mat.png'
-import maykhoan from '../../assets/images/thietbi/Maykhoan.jpg'
-import khoidongtu from '../../assets/images/thietbi/khoi-dong-tu.jpg'
-import { useDispatch, useSelector } from 'react-redux'
-
+import React, { useEffect, useCallback } from 'react'
+import { myData } from '../widgets/data'
 import { CRow, CContainer } from '@coreui/react'
 import WidgetThietbi from '../widgets/WidgetThietbi'
-export const myData = [
-  {
-    image: bomnuoc,
-    title: "Bơm nước",
-    desc: "Tổng số thiết bị",
-    url: "/quatgio/capnhatquatgio",
-    sl: "150"
-  },
-  {
-    image: maycao,
-    title: "Máy cào",
-    desc: "Tổng số thiết bị",
-    url: "/maycao/capnhatmaycao",
-    sl: "150"
-  },
-  {
-    image: bangtai,
-    title: "Băng tải",
-    desc: "Tổng số thiết bị",
-    url: "/bangtai/capnhatbangtai",
-    sl: "150"
-  },
-  {
-    image: bienap,
-    title: "Biến áp",
-    desc: "Tổng số thiết bị",
-    url: "/bienap/capnhatbienap",
-    sl: "150"
-  },
-  {
-    image: capdien,
-    title: "Cáp điện",
-    desc: "Tổng số thiết bị",
-    url: "/capdien/capnhatcapdien",
-    sl: "150"
-  },
-  {
-    image: aptomat,
-    title: "Áp to mát",
-    desc: "Tổng số thiết bị",
-    url: "/aptomat/capnhataptomat",
-    sl: "150"
-  },
-  {
-    image: maykhoan,
-    title: "Máy khoan",
-    desc: "Tổng số thiết bị",
-    url: "/maykhoan/capnhatmaykhoan",
-    sl: "150"
-  },
-  {
-    image: khoidongtu,
-    title: "Khởi động từ",
-    desc: "Tổng số thiết bị",
-    url: "/khoidongtu/capnhatkhoidongtu",
-    sl: "150"
-  },
-];
+import { useDispatch, useSelector } from 'react-redux'
+import { readAllQuatgio } from '../../reducer/quatgioSlice'
 const Dashboard = () => {
-  const data = useSelector((state) => state.quatgios.data)
-  const counts = data.length;
+  const dispatch = useDispatch()
+  useEffect(() => {
+    quatgioData();
+  }, [])
+
+  const quatgioData = useCallback(async () => {
+    try {
+      dispatch(readAllQuatgio());
+    } catch (error) {
+      console.log(error)
+    }
+  }, [])
+  //Lấy dữ liệu từ bảng Tonghopquatgio
+  const quatgios = useSelector((state) => state.quatgios.data)
+  const Data = myData;
+  //Tạo hàm tính tổng
+  function tinhTong(arr) {
+    let count = 0;
+    for (let i = 0; i < arr.length; i++) {
+      count += arr[i].soLuong;
+    }
+    return count
+  }
+  //Tính tổng số lượng quạt gió
+  const countQuatgio = tinhTong(quatgios);
+  console.log("countQuatgio", countQuatgio)
+
+  //Dùng vòng lặp để gán tổng vào myData
+  for (let i = 0; i < myData.length; i++) {
+    switch (Data[i].name) {
+      case "bomnuoc":
+        Data[i].sl = countQuatgio
+        break;
+      case "maycao":
+        Data[i].sl = 25
+        break;
+      case "bangtai":
+        Data[i].sl = 150
+        break;
+      default:
+        Data[i].sl = null
+    }
+  }
 
   return (
     <>
       <CContainer fluid>
-        <CRow xs={{ cols: 1, gutter: 2 }} lg={{ cols: 6, gutter: 4 }}>
-          {myData.map((item) => (
+        <CRow xs={{ cols: 1, gutter: 2 }} md={{ cols: 3, gutter: 4 }} lg={{ cols: 6, gutter: 4 }} >
+          {Data.map((item) => (
             <WidgetThietbi key={item.title} {...item} />
           ))}
         </CRow>

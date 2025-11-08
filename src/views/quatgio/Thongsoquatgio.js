@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { quatgioService } from "../../service/quatgioService"
+import { thongsoquatgioService as quatgioService } from "../../service/quatgio/thongsoquatgioService";
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 

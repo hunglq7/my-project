@@ -1,6 +1,6 @@
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
-import { quatgioService } from '../../service/quatgioService';
+import { danhmucquatgioService as quatgioService } from '../../service/quatgio/danhmucquatgioService';
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { Button, Flex } from 'antd';
 import { DeleteFilled, FileAddFilled, SaveFilled } from '@ant-design/icons'
