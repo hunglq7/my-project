@@ -1,8 +1,9 @@
-import React, { Component, useEffect, useState, useRef, useCallback, memo } from 'react'
+import React, { useEffect, useState, useRef, useCallback, memo } from 'react'
 import {
     CCard, CCardBody, CCardHeader, CCol, CRow,
     CButton, CForm, CFormCheck, CFormInput, CFormSelect
 } from '@coreui/react'
+import { Message } from 'primereact/message';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Tag } from 'primereact/tag';
@@ -13,22 +14,23 @@ import { InputText } from 'primereact/inputtext';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import { Dropdown } from 'primereact/dropdown';
+import { classNames } from 'primereact/utils';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
-import { DeleteFilled, EditFilled, SearchOutlined, SaveFilled, UndoOutlined, OpenAIFilled, FileAddFilled, DownloadOutlined, CloseOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Form, Input, Flex } from 'antd';
-import { InputNumber } from 'antd';
+import { DeleteFilled, EditFilled, SaveFilled, UndoOutlined, FileAddFilled, DownloadOutlined } from '@ant-design/icons';
+import { Button, Flex } from 'antd';
 import AppToasts from '../../components/AppToasts';
-import { CToaster } from '@coreui/react'
-import { CTab, CTabContent, CTabList, CTabPanel, CTabs } from '@coreui/react'
+import { CTab, CTabContent, CTabList, CTabPanel, CTabs, CPopover } from '@coreui/react'
 import { donviService } from '../../service/donviService';
 import Nhatkyquatgio from './Nhatkyquatgio';
 import Thongsoquatgio from './Thongsoquatgio';
+import { useDispatch } from 'react-redux';
 import moment from 'moment';
-import { useDispatch, useSelector } from 'react-redux'
-import { readAllQuatgio } from '../../reducer/quatgioSlice';
 import { tonghopquatgioService as quatgioService } from '../../service/quatgio/tonghopquatgioService';
+import { danhmucquatgioService } from '../../service/quatgio/danhmucquatgioService';
+import { getThongsoquatgioById } from '../../reducer/thongsoquatgioSlice';
+import { Toast } from 'primereact/toast';
 function Capnhatquatgio() {
     const myDate = () => {
         const date = memo(new Date()).formatDate("dd/mm/yyyy")
@@ -48,7 +50,8 @@ function Capnhatquatgio() {
         duPhong: false,
         ghiChu: ''
     };
-    const quatgios = useSelector((state) => state.quatgios.data)
+
+    const [quatgios, setQuatgios] = useState([])
     const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
     const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
     const quatgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
@@ -65,25 +68,28 @@ function Capnhatquatgio() {
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isSave, setIsSave] = useState(false);
-    const [toast, addToast] = useState()
+
     const toaster = useRef(null)
     const dt = useRef(null);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
+    const toast = useRef(null);
     useEffect(() => {
         fetchData();
         getDonvis();
         getDanhmucquatgios()
     }, [isSave])
 
-    const fetchData = useCallback(async () => {
+    const fetchData = async () => {
         try {
-            dispatch(readAllQuatgio());
+            quatgioService.getQuatgio().then(response => {
+                setQuatgios(response.data)
+            })
         } catch (error) {
             console.log(error)
         }
-    }, [])
+    }
 
-    const getDonvis = useCallback(async () => {
+    const getDonvis = async () => {
         try {
             await donviService.getDonvi().then(response => {
                 setDonvis(response.data)
@@ -91,17 +97,17 @@ function Capnhatquatgio() {
         } catch (error) {
             console.log(error)
         }
-    }, [])
+    }
 
-    const getDanhmucquatgios = useCallback(async () => {
+    const getDanhmucquatgios = async () => {
         try {
-            await quatgioService.getDanhmucquatgio().then(response => {
+            await danhmucquatgioService.getDanhmucquatgio().then(response => {
                 setDanhmucquatgios(response.data)
             })
         } catch (error) {
             console.log(error)
         }
-    }, [])
+    }
 
     const openNew = () => {
         setQuatgioId(0);
@@ -112,11 +118,11 @@ function Capnhatquatgio() {
     };
 
     const editQuatgio = (rowData) => {
+        dispatch(getThongsoquatgioById(rowData.quatGioId))
         const id = rowData.id;
         const idCanTim = rowData.quatGioId;
         let ketQua = null;
         for (let i = 0; i < quatgios.length; i++) {
-            console.log("Danh sách cần tìm:", quatgios[i])
             if (quatgios[i].quatGioId === idCanTim) {
                 ketQua = quatgios[i].tenThietBi;
                 break; // dừng vòng lặp khi tìm thấy
@@ -135,7 +141,7 @@ function Capnhatquatgio() {
         setIsSave(false);
     };
 
-    const getQuatgioById = useCallback((id) => {
+    const getQuatgioById = (id) => {
         quatgioService.getQuatgioById(id).then(response => {
             if (response) {
                 const _quatgio = response.data;
@@ -148,7 +154,7 @@ function Capnhatquatgio() {
                 console.log("Lỗi lấy dữ liệu chi tiết quạt gió theo id")
             }
         })
-    }, [])
+    }
 
     const onDeleteQuatgio = () => {
         let id = quatgio.id;
@@ -164,28 +170,38 @@ function Capnhatquatgio() {
     };
 
     const onSave = () => {
+        setSubmitted(true)
         const _quatgio = quatgio;
         if (submitted) {
             //Update
             quatgioService.updateTonghopquatgio(_quatgio).then(response => {
                 if (response) {
                     setIsSave(true)
-                    addToast(quatgioUpdateToast)
+                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Cập nhật thành công', life: 3000 });
+                    setQuatgioDialog(false)
                 }
             })
 
         }
         else {
             //Thêm mới
-            quatgioService.addTonghopquatgio(_quatgio).then(response => {
-                if (response) {
-                    setIsSave(true)
-                    addToast(quatgioAddToast)
-                }
-            })
+            try {
+                quatgioService.addTonghopquatgio(_quatgio).then(response => {
+                    if (response) {
+                        setIsSave(true)
+                        toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Thêm mới thành công', life: 3000 });
+                    }
+                    else {
+                        toast.current.show({ severity: 'error', summary: 'Error', detail: 'Thêm mới thất bại', life: 3000 });
+
+                    }
+                })
+            }
+            catch (error) {
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: { error }, life: 3000 });
+            }
 
         }
-        setQuatgioDialog(false)
         setSelectedQuatgios(null)
         setIsSave(false)
     }
@@ -334,8 +350,8 @@ function Capnhatquatgio() {
 
     return (
         <>
+            <Toast ref={toast} />
 
-            <CToaster className="p-3 z-500" placement="top-end" push={toast} ref={toaster} />
             <CRow>
 
                 <CCol xs={12}>
@@ -365,94 +381,102 @@ function Capnhatquatgio() {
             </CRow>
 
             <Dialog visible={quatgioDialog} style={{ width: '64rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa thiết bị: ${tenthietbi}` : `Thêm thiết bị`} modal className="p-fluid" onHide={hideDialog}>
-                <div className='mt-2'>
-                    <CTabs defaultActiveItemKey={1}>
-                        <CTabList variant="underline-border">
-                            <CTab aria-controls="Capnhat-tab-pane" itemKey={1}>Cập nhật quạt gió</CTab>
-                            <CTab hidden={!submitted} aria-controls="Nhatky-tab-pane" itemKey={2}>Nhật ký quạt gió</CTab>
-                            <CTab hidden={!submitted} aria-controls="Thongso-tab-pane" itemKey={3}>Thông số ký thuật</CTab>
 
-                        </CTabList>
-                        <CTabContent>
-                            <CTabPanel className="py-3 " aria-labelledby="Capnhat-tab-pane" itemKey={1}>
-                                <CForm className="row g-3 ">
-                                    <CCol md={6}>
-                                        <CFormInput disabled={true} value={quatgio.id} onChange={(e) => onInputChange(e, 'id')} type="text" id="maQuanLy" label="id:" />
-                                    </CCol>
-                                    <CCol md={6}>
-                                        <CFormInput value={quatgio.maQuanLy} onChange={(e) => onInputChange(e, 'maQuanLy')} type="text" id="maQuanLy" label="Mã quản lý:" />
-                                    </CCol>
-                                    <CCol md={6}>
-                                        <div >
-                                            <label className="form-label">Đơn vị:</label>
-                                            <select className='form-select' id="donViId" value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} label="Đơn vị">
-                                                <option value="">--Chọn đơn vị--</option> {/* Optional placeholder */}
-                                                {donvis.map((option) => (
-                                                    <option key={option.id} value={option.id}>
-                                                        {option.tenPhong}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                <CRow className='px-4'>
+                    <CCol>
+                        <CTabs defaultActiveItemKey={1}>
+                            <CTabList variant="underline-border">
+                                <CTab aria-controls="Capnhat-tab-pane" itemKey={1}>Cập nhật quạt gió</CTab>
+                                <CTab hidden={!submitted} aria-controls="Nhatky-tab-pane" itemKey={2}>Nhật ký quạt gió</CTab>
+                                <CTab hidden={!submitted} aria-controls="Thongso-tab-pane" itemKey={3}>Thông số ký thuật</CTab>
 
-                                    </CCol>
-                                    <CCol md={6}>
-                                        <div >
-                                            <label className="form-label">Thiết bị:</label>
-                                            <select className='form-select' id="quatGioId" value={quatgio.quatGioId} onChange={(e) => onInputChange(e, 'quatGioId')} >
-                                                <option value="">--Chọn thiết bị--</option> {/* Optional placeholder */}
-                                                {danhmucquatgios.map((option) => (
-                                                    < option key={option.id} value={option.id} >
-                                                        {option.tenThietBi}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
+                            </CTabList>
+                            <CTabContent>
+                                <CTabPanel className="py-3 " aria-labelledby="Capnhat-tab-pane" itemKey={1}>
+                                    <CForm className="row g-3 ">
+                                        <CCol md={6}>
+                                            <CFormInput disabled={true} value={quatgio.id} onChange={(e) => onInputChange(e, 'id')} type="text" id="maQuanLy" label="id:" />
+                                        </CCol>
+                                        <CCol md={6}>
 
-                                    </CCol>
+                                            <CFormInput value={quatgio.maQuanLy} onChange={(e) => onInputChange(e, 'maQuanLy')} type="text" id="maQuanLy" label="Mã quản lý:" className={classNames({ 'p-invalid': submitted && !quatgio.maQuanLy })} />
+                                            {submitted && !quatgio.maQuanLy && <small className="p-error">Mã quản lý phải nhập</small>}
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <div >
+                                                <label className="form-label">Đơn vị:</label>
+                                                <select className='form-select' id="donViId" value={quatgio.donViId} onChange={(e) => onInputChange(e, 'donViId')} label="Đơn vị">
+                                                    <option value="">--Chọn đơn vị--</option> {/* Optional placeholder */}
+                                                    {donvis.map((option) => (
+                                                        <option key={option.id} value={option.id}>
+                                                            {option.tenPhong}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <div >
+                                                <label className="form-label">Thiết bị:</label>
+                                                <select className='form-select' id="quatGioId" value={quatgio.quatGioId} onChange={(e) => onInputChange(e, 'quatGioId')} >
+                                                    <option value="">--Chọn thiết bị--</option> {/* Optional placeholder */}
+                                                    {danhmucquatgios.map((option) => (
+                                                        < option key={option.id} value={option.id} >
+                                                            {option.tenThietBi}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                        </CCol>
 
 
-                                    <CCol md={12}>
-                                        <CFormInput value={quatgio.viTriLapDat} onChange={(e) => onInputChange(e, 'viTriLapDat')} type="text" id="viTriLapDat" label="Vị trí lắp đặt:" />
-                                    </CCol>
-                                    <CCol md={12}>
-                                        <CFormInput value={quatgio.tinhTrangThietBi} onChange={(e) => onInputChange(e, 'tinhTrangThietBi')} type="text" id="tinhTrangThietBi" label="Tình trạng:" />
-                                    </CCol>
-                                    <CCol md={6}>
-                                        <CFormInput value={quatgio.soLuong} onChange={(e) => onInputNumberChange(e, 'soLuong')} type="number" id="soLuong" label="Số lượng:" />
-                                    </CCol>
-                                    <CCol md={6}>
-                                        <CFormInput value={quatgio.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
-                                    </CCol>
-                                    <CCol md={12}>
-                                        <CFormCheck checked={quatgio.duPhong} onChange={(e) => onDuphongChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
-                                    </CCol>
-                                    <CCol xs={12}>
+                                        <CCol md={12}>
+                                            <CFormInput value={quatgio.viTriLapDat} onChange={(e) => onInputChange(e, 'viTriLapDat')} type="text" id="viTriLapDat" label="Vị trí lắp đặt:" />
+                                        </CCol>
+                                        <CCol md={12}>
+                                            <CFormInput value={quatgio.tinhTrangThietBi} onChange={(e) => onInputChange(e, 'tinhTrangThietBi')} type="text" id="tinhTrangThietBi" label="Tình trạng:" />
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <CFormInput value={quatgio.soLuong} onChange={(e) => onInputNumberChange(e, 'soLuong')} type="number" id="soLuong" label="Số lượng:" />
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <CFormInput value={quatgio.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
+                                        </CCol>
+                                        <CCol md={12}>
+                                            <CFormCheck checked={quatgio.duPhong} onChange={(e) => onDuphongChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
+                                        </CCol>
+                                        <CCol xs={12}>
 
-                                        <Flex wrap gap="small" justify='start' className='mt-3'>
-                                            <Button type="primary" icon={<SaveFilled />} onClick={onSave}>
-                                                Lưu
-                                            </Button>
-                                            <Button color="danger" variant="outlined" icon={<UndoOutlined />} onClick={hideDialog}>
-                                                Không
-                                            </Button>
-                                        </Flex>
-                                    </CCol>
-                                </CForm>
-                            </CTabPanel>
-                            <CTabPanel className="py-3 " aria-labelledby="Nhatky-tab-pane" itemKey={2}>
+                                            <Flex wrap gap="small" justify='start' className='mt-3'>
+                                                <Button type="primary" icon={<SaveFilled />} onClick={onSave}>
+                                                    Lưu
+                                                </Button>
+                                                <Button color="danger" variant="outlined" icon={<UndoOutlined />} onClick={hideDialog}>
+                                                    Không
+                                                </Button>
+                                            </Flex>
+                                        </CCol>
+                                    </CForm>
+                                </CTabPanel>
+                                <CTabPanel className="py-3 " aria-labelledby="Nhatky-tab-pane" itemKey={2}>
+                                    <Nhatkyquatgio quatgio={quatgioId} />
+                                </CTabPanel>
+                                <CTabPanel className="py-3" aria-labelledby="Thongso-tab-pane" itemKey={3}>
+                                    <Thongsoquatgio />
+                                </CTabPanel>
 
-                                <Nhatkyquatgio quatgio={quatgioId} />
+                            </CTabContent>
+                        </CTabs>
 
-                            </CTabPanel>
-                            <CTabPanel className="py-3" aria-labelledby="Thongso-tab-pane" itemKey={3}>
-                                <Thongsoquatgio quatgio={quatgio} />
-                            </CTabPanel>
 
-                        </CTabContent>
-                    </CTabs>
 
-                </div>
+                    </CCol>
+                </CRow>
+
+
+
             </Dialog >
 
             <Dialog visible={deleteQuatgioDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteQuatgioDialogFooter} onHide={hideDeleteQuatgioDialog}>

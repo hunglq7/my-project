@@ -1,39 +1,20 @@
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
-import { nhatkyquatgioService as quatgioService } from '../../service/quatgio/nhatkyquatgioService';
+import { danhmucmaycaoService } from '../../service/maycao/danhmucmaycaoService'
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { Button, Flex } from 'antd';
 import { DeleteFilled, FileAddFilled, SaveFilled } from '@ant-design/icons'
+import { Toast } from 'primereact/toast';
+import 'primeicons/primeicons.css';
+import 'primereact/resources/primereact.css';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
 ModuleRegistry.registerModules([AllCommunityModule]);
-function Nhatkyquatgio({ quatgio }) {
+
+const Capnhatdanhmucmaycao = () => {
+    const toast = useRef(null);
     const gridRef = useRef(null);
-    const id = quatgio
     const [isSave, setIsSave] = useState(false);
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                await quatgioService.getNhatkyById(id).then(response => {
-                    setRowData(response.data)
-                    console.log("data:", response.data)
-                })
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        fetchData()
-    }, [isSave])
-    const [rowData, setRowData] = useState([
-    ]);
-
-    const defaultColDef = useMemo(() => {
-        return {
-            flex: 1,
-            editable: true,
-        };
-    }, []);
-
-
-    // Column Definitions: Defines the columns to be displayed.
+    const [rowData, setRowData] = useState([]);
     const [colDefs, setColDefs] = useState([
         {
             field: 'id',
@@ -41,58 +22,50 @@ function Nhatkyquatgio({ quatgio }) {
             hide: true,
         },
         {
-            field: 'tonghopquatgioId',
-            hide: true,
-        },
-        {
-            field: 'ngaythang',
-            headerName: 'Ngày sử dụng',
+            field: 'tenThietBi',
+            headerName: 'Thiết bị',
             editable: true,
             cellEditorPopup: true,
         },
         {
-            field: 'donVi',
-            headerName: 'Đơn vị',
+            field: 'loaithietbi',
+            headerName: 'Loại thiết bị',
             editable: true,
             cellEditorPopup: true,
         },
-
-        {
-            field: 'viTri',
-            headerName: 'Vị trí',
-            editable: true,
-            cellEditor: 'agLargeTextCellEditor',
-            cellEditorPopup: true,
-            cellEditorParams: {
-                maxLength: 20
-            }
-        },
-        {
-            field: 'trangThai',
-            headerName: 'Tình trạng',
-            editable: true,
-            cellEditorPopup: true,
-        },
-        { field: 'ghiChu', headerName: 'Ghi chú' },
 
 
     ]);
+    useEffect(() => {
+        fetchData();
+    }, [isSave])
 
+    const fetchData = async () => {
+        try {
+            await danhmucmaycaoService.getDanhmucmaycaos().then(response => {
+                setRowData(response.data)
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     function createNewRowData() {
         const newData = {
             id: 0,
-            tonghopquatgioId: id,
-            ngaythang: "",
-            donVi: "",
-            viTri: "",
-            trangThai: "",
-            ghiChu: ""
+            tenThietBi: "",
+            loaithietbi: ""
         };
 
         return newData;
     }
 
+    const defaultColDef = useMemo(() => {
+        return {
+            flex: 1,
+            editable: true,
+        };
+    }, []);
 
     const addItems = useCallback(() => {
         const newItems = [
@@ -105,38 +78,37 @@ function Nhatkyquatgio({ quatgio }) {
         console.log("res", res)
     }, []);
 
-
-
     const Save = useCallback(() => {
         let seletcRow = gridRef.current.api.getSelectedRows()
-        quatgioService.addNhatkyquatgios(seletcRow).then(response => {
+        danhmucmaycaoService.updateDanhmucmaycaos(seletcRow).then(response => {
             if (response) {
-                addToast(quatgioAddToast)
+                toast.current.show({ severity: 'success', summary: 'Success', detail: `Lưu thành công ${response.data} bản ghi`, life: 3000 });
                 setIsSave(true)
             }
             else {
-                addToast(quatgioAddErorToast)
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Lưu bản ghi thất bại', life: 3000 });
             }
-
         })
         setIsSave(false)
     }, [])
 
     const deleteRows = useCallback(() => {
         const seletcRow = gridRef.current.api.getSelectedRows()
-        quatgioService.deleteNhatkyQuatgios(seletcRow).then(response => {
+        danhmucmaycaoService.deleteDanhmucmaycaos(seletcRow).then(response => {
             if (response) {
                 gridRef.current.api.applyTransaction({
                     remove: seletcRow,
                 });
-                addToast(qutgioDeleteToast)
+
+                toast.current.show({ severity: 'success', summary: 'Success', detail: `Xóa thành công ${response.data} bản ghi`, life: 3000 });
                 setIsSave(true)
             }
             else {
-                addToast(quatgioDeleteErorToast)
+                toast.current.show({ severity: 'error', summary: 'Error', detail: 'Xóa bản ghi thất bại', life: 3000 });
             }
 
         })
+
         setIsSave(false)
     }, [])
 
@@ -146,10 +118,11 @@ function Nhatkyquatgio({ quatgio }) {
         };
     }, []);
     const pagination = true;
-    const paginationPageSize = 10;
-    const paginationPageSizeSelector = [5, 10, 20];
+    const paginationPageSize = 500;
+    const paginationPageSizeSelector = [10, 20, 50];
     return (
         <>
+            <Toast ref={toast} />
             <Flex wrap gap="small" justify='start' className='mb-2'>
                 <Button type="primary" icon={<FileAddFilled />} onClick={() => addItems()}>
                     Thêm
@@ -160,8 +133,8 @@ function Nhatkyquatgio({ quatgio }) {
                 </Button>
             </Flex>
 
-            <div style={{ height: 500 }}>
-                <AgGridReact
+            <div style={{ height: 800 }}>
+                <AgGridReact className='ag-theme-quartz'
                     ref={gridRef}
                     rowData={rowData}
                     columnDefs={colDefs}
@@ -170,9 +143,11 @@ function Nhatkyquatgio({ quatgio }) {
                     pagination={pagination}
                     paginationPageSize={paginationPageSize}
                     paginationPageSizeSelector={paginationPageSizeSelector}
+                    animateRows={true}
                 />
             </div>
         </>
     )
+
 }
-export default React.memo(Nhatkyquatgio)
+export default Capnhatdanhmucmaycao

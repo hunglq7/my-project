@@ -28,6 +28,7 @@ const Capnhatthongsoquatgio = () => {
     const [thongsoquatgios, setThongsoquatgios] = useState([]);
     const [thongsoquatgio, setThongsoquatgio] = useState(emptyThongsoquatgio);
     const [danhmucquatgios, setDanhmucquatgios] = useState([]);
+    const [thongsoquatgioId, setThongsoquatgioId] = useState(null);
     const [thongsoquatgioDialog, setThongsoquatgioDialog] = useState(false);
     const [deleteThongsoquatgioDialog, setDeleteThongsoquatgioDialog] = useState(false);
     const [deleteThongsoquatgiosDialog, setDeleteThongsoquatgiosDialog] = useState(false);
@@ -42,7 +43,7 @@ const Capnhatthongsoquatgio = () => {
     useEffect(() => {
         fetchData();
         getDanhmucquatgios()
-    }, [])
+    }, [isSave])
 
     async function fetchData() {
         try {
@@ -54,7 +55,7 @@ const Capnhatthongsoquatgio = () => {
         }
     }
 
-    const getDanhmucquatgios = useCallback(async () => {
+    const getDanhmucquatgios = async () => {
         try {
             await danhmucService.getDanhmucquatgio().then(response => {
                 setDanhmucquatgios(response.data)
@@ -62,30 +63,9 @@ const Capnhatthongsoquatgio = () => {
         } catch (error) {
             console.log(error)
         }
-    }, [])
+    }
 
-    const actionBodyTemplate = (rowData) => {
-        return (
-            <React.Fragment>
-                <Flex wrap gap="small">
-                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => edit(rowData)} />
-                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDelete(rowData)} />
-                </Flex>
-            </React.Fragment>
-        );
-    };
-    const leftToolbarTemplate = () => {
-        return (
-            <Flex wrap gap="small">
-                <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedThongsoquatgios || !selectedThongsoquatgios.length}  > Xóa</Button>
-            </Flex>
-        );
-    };
 
-    const rightToolbarTemplate = () => {
-        return <Button color="cyan" variant="solid" icon={<DownloadOutlined />} onClick={exportCSV} >Export</Button>;
-    };
 
     const edit = (items) => {
         const id = items.id;
@@ -108,9 +88,10 @@ const Capnhatthongsoquatgio = () => {
         setIsSave(false);
     };
 
-    const getThongsoquatgioById = useCallback((id) => {
-        quatgioService.getThongsoquatgioById(id).then(response => {
+    const getThongsoquatgioById = (id) => {
+        quatgioService.getThongsoquatDetailgioById(id).then(response => {
             if (response) {
+                console.log(response.data)
                 const _items = response.data;
                 setThongsoquatgio({ ..._items })
             }
@@ -118,7 +99,7 @@ const Capnhatthongsoquatgio = () => {
                 console.log("Lỗi lấy dữ liệu chi tiết quạt gió theo id")
             }
         })
-    }, [])
+    }
 
     const onDelete = () => {
         let id = thongsoquatgio.id;
@@ -167,7 +148,7 @@ const Capnhatthongsoquatgio = () => {
 
     const save = () => {
         setSubmitted(true);
-        if (thongsoquatgio.id.trim()) {
+        if (thongsoquatgio.noiDung.trim()) {
             let _items = { ...thongsoquatgio };
             if (thongsoquatgio.id == 0) {
                 quatgioService.addThongsoquatgio(_items).then((response) => {
@@ -188,9 +169,54 @@ const Capnhatthongsoquatgio = () => {
             }
             setIsSave(false);
             setThongsoquatgio(emptyThongsoquatgio);
+            setSelectedThongsoquatgios(false)
         }
     }
+    const hideDeleteThongsoquatgioDialog = () => {
+        setDeleteThongsoquatgioDialog(false);
+        setSelectedThongsoquatgios(null)
+    };
+    const hideDeleteThongsoquatgiosDialog = () => {
+        setDeleteThongsoquatgiosDialog(false);
+        setSelectedThongsoquatgios(null)
+    };
+    const hideDialog = () => {
+        setSubmitted(false);
+        setThongsoquatgioDialog(false);
+        setSelectedThongsoquatgios(null)
+    };
+    const confirmDelete = (item) => {
+        setThongsoquatgio(item);
+        setDeleteThongsoquatgioDialog(true);
+        setSelectedThongsoquatgios(null)
+    };
 
+    const confirmDeleteSelected = () => {
+        setDeleteThongsoquatgiosDialog(true);
+    };
+
+    const actionBodyTemplate = (rowData) => {
+        return (
+            <React.Fragment>
+                <Flex wrap gap="small">
+                    <Button color="primary" variant="outlined" shape="circle" icon={<EditFilled />} onClick={() => edit(rowData)} />
+                    <Button color="danger" variant="outlined" shape="circle" icon={<DeleteFilled />} onClick={() => confirmDelete(rowData)} />
+                </Flex>
+            </React.Fragment>
+        );
+    };
+    const leftToolbarTemplate = () => {
+        return (
+            <Flex wrap gap="small">
+                <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedThongsoquatgios || !selectedThongsoquatgios.length}  > Xóa</Button>
+            </Flex>
+        );
+    };
+
+    const rightToolbarTemplate = () => {
+        return <Button color="cyan" variant="solid" icon={<DownloadOutlined />} onClick={exportCSV} >Export</Button>;
+    };
     const header = (
         <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
             <IconField iconPosition="left">
@@ -201,7 +227,7 @@ const Capnhatthongsoquatgio = () => {
     );
     const deleteThongsoquatgioDialogFooter = (
         <Flex wrap gap="small" justify='end'>
-            <Button type="primary" icon={<UndoOutlined />} onClick={setDeleteThongsoquatgioDialog(false)}>
+            <Button type="primary" icon={<UndoOutlined />} onClick={hideDeleteThongsoquatgioDialog}>
                 No
             </Button>
             <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={onDelete}>
@@ -214,7 +240,7 @@ const Capnhatthongsoquatgio = () => {
     const deleteThongsoquatgiosDialogFooter = (
         <React.Fragment>
             <Flex wrap gap="small" justify='end'>
-                <Button type="primary" icon={<UndoOutlined />} onClick={setDeleteThongsoquatgiosDialog(false)}>
+                <Button type="primary" icon={<UndoOutlined />} onClick={hideDeleteThongsoquatgiosDialog}>
                     No
                 </Button>
                 <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={deleteSelected}>
@@ -226,7 +252,7 @@ const Capnhatthongsoquatgio = () => {
 
     const thongsoquatgioDialogFooter = (
         <Flex wrap gap="small" justify='end'>
-            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={setDeleteThongsoquatgioDialog(false)}>
+            <Button color="primary" variant="outlined" icon={<CloseOutlined />} onClick={hideDialog}>
                 Close
             </Button>
             <Button color="primary" variant="solid" icon={<SaveFilled />} onClick={save}>
@@ -235,24 +261,7 @@ const Capnhatthongsoquatgio = () => {
         </Flex>
     );
 
-    const hideDeleteThongsoquatgioDialog = () => {
-        setDeleteThongsoquatgioDialog(false);
-    };
-    const hideDeleteThongsoquatgiosDialog = () => {
-        setDeleteThongsoquatgiosDialog(false);
-    };
-    const hideDialog = () => {
-        setSubmitted(false);
-        setThongsoquatgioDialog(false);
-    };
-    const confirmDelete = (item) => {
-        setThongsoquatgio(item);
-        setDeleteThongsoquatgioDialog(true);
-    };
 
-    const confirmDeleteSelected = () => {
-        setDeleteThongsoquatgiosDialog(true);
-    };
     return (
         <>
             <Toast ref={toast} />
@@ -268,7 +277,6 @@ const Capnhatthongsoquatgio = () => {
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
                                 <Column selectionMode="multiple" exportable={false}></Column>
-                                <Column field="id" header="ID" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="tenThietBi" header="Tên thiết bị" sortable style={{ minWidth: '16rem' }}></Column>
                                 <Column field="noiDung" header="Nội dung" sortable style={{ minWidth: '16rem' }}></Column>
                                 <Column field="thongSo" header="Thông số" sortable style={{ minWidth: '16rem' }}></Column>
@@ -279,19 +287,21 @@ const Capnhatthongsoquatgio = () => {
                 </CCol>
             </CRow>
 
-            <Dialog visible={thongsoquatgioDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? "Sửa chức vụ" : "Thêm chức vụ"} modal className="p-fluid" footer={thongsoquatgioDialogFooter} onHide={hideDialog}>
+            <Dialog visible={thongsoquatgioDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa bản ghi: ${tenthietbi}` : "Thêm thông số"} modal className="p-fluid" footer={thongsoquatgioDialogFooter} onHide={hideDialog}>
                 <CForm className='mt-2'>
                     <CRow className="mb-3">
                         <CFormLabel htmlFor="id" className="col-sm-3 col-form-label">
                             Id
                         </CFormLabel>
                         <CCol sm={9}>
-                            <CFormInput value={thongsoquatgio.id} type="text" id="id" />
+                            <CFormInput disabled={true} value={thongsoquatgio.id} type="text" id="id" />
                         </CCol>
                     </CRow>
-                    <CCol md={6}>
-                        <div >
-                            <label className="form-label">Thiết bị:</label>
+                    <CRow className="mb-3">
+                        <CFormLabel htmlFor="id" className="col-sm-3 col-form-label">
+                            Thiết bị
+                        </CFormLabel>
+                        <CCol sm={9}>
                             <select className='form-select' id="quatgioId" value={thongsoquatgio.quatgioId} onChange={(e) => onInputChange(e, 'quatgioId')} >
                                 <option value="">--Chọn thiết bị--</option> {/* Optional placeholder */}
                                 {danhmucquatgios.map((option) => (
@@ -300,9 +310,10 @@ const Capnhatthongsoquatgio = () => {
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </CCol>
 
-                    </CCol>
+                    </CRow>
+
                     <CRow className="mb-3">
                         <CFormLabel htmlFor="noiDung" className="col-sm-3 col-form-label">
                             Nội dung
@@ -348,7 +359,7 @@ const Capnhatthongsoquatgio = () => {
             <Dialog visible={deleteThongsoquatgiosDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteThongsoquatgiosDialogFooter} onHide={hideDeleteThongsoquatgiosDialog}>
                 <div className="confirmation-content">
                     <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                    {thongsoquatgio && <span>Bạn có chắc chắn muốn xóa các chức vụ đã chọn không?</span>}
+                    {thongsoquatgio && <span>Bạn có chắc chắn muốn xóa bản ghi đã chọn không?</span>}
                 </div>
             </Dialog>
         </>

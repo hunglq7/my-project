@@ -185,15 +185,15 @@ export default function ProductsDemo() {
 
     const leftToolbarTemplate = () => {
         return (
-            <div className="flex flex-wrap gap-2">
-                <Button label="Thêm" icon="pi pi-plus" severity="success" onClick={openNew} />
-                <Button label="Xóa" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
+            <div className="d-flex gap-2">
+                <Button style={{ borderRadius: 5 }} className='py-1 px-2 ' label="Thêm" icon="pi pi-plus" severity="primery" onClick={openNew} />
+                <Button style={{ borderRadius: 5 }} className='py-1 px-2 ' label="Xóa" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedProducts || !selectedProducts.length} />
             </div>
         );
     };
 
     const rightToolbarTemplate = () => {
-        return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
+        return <Button label="Export" icon="pi pi-upload" className="p-button-help py-1 px-2 btn btn-primary" onClick={exportCSV} />;
     };
 
     const imageBodyTemplate = (rowData) => {
@@ -215,8 +215,10 @@ export default function ProductsDemo() {
     const actionBodyTemplate = (rowData) => {
         return (
             <React.Fragment>
-                <Button icon="pi pi-pencil" rounded outlined className="mr-2 " onClick={() => editProduct(rowData)} />
-                <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
+                <div className='d-flex gap-2'>
+                    <Button style={{ borderRadius: 100 }} icon="pi pi-pencil" rounded outlined onClick={() => editProduct(rowData)} />
+                    <Button style={{ borderRadius: 100 }} icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
+                </div>
             </React.Fragment>
         );
     };
@@ -248,20 +250,26 @@ export default function ProductsDemo() {
     );
     const productDialogFooter = (
         <React.Fragment>
-            <Button className='mr-2' label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
-            <Button label="Save" icon="pi pi-check" onClick={saveProduct} />
+            <div className='d-flex gap-2'>
+                <Button className='py-1 px-2' label="Cancel" icon="pi pi-times" outlined onClick={hideDialog} />
+                <Button className='py-1 px-2' label="Save" icon="pi pi-check" onClick={saveProduct} />
+            </div>
         </React.Fragment>
     );
     const deleteProductDialogFooter = (
         <React.Fragment>
-            <Button label="No" icon="pi pi-times" outlined onClick={hideDeleteProductDialog} />
-            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteProduct} />
+            <div className='d-flex gap-2'>
+                <Button className='py-1 px-2' label="No" icon="pi pi-times" outlined onClick={hideDeleteProductDialog} />
+                <Button className='py-1 px-2' label="Yes" icon="pi pi-check" severity="danger" onClick={deleteProduct} />
+            </div>
         </React.Fragment>
     );
     const deleteProductsDialogFooter = (
         <React.Fragment>
-            <Button className='mr-2' label="No" icon="pi pi-times" outlined onClick={hideDeleteProductsDialog} />
-            <Button label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+            <div className='d-flex gap-2'>
+                <Button className='py-1 px-2' label="No" icon="pi pi-times" outlined onClick={hideDeleteProductsDialog} />
+                <Button className="py-1 px-2" label="Yes" icon="pi pi-check" severity="danger" onClick={deleteSelectedProducts} />
+            </div>
         </React.Fragment>
     );
 
@@ -271,13 +279,9 @@ export default function ProductsDemo() {
         <div>
 
             <Toast ref={toast} />
-
-
             <div className="card">
-
                 <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
-
-                <DataTable ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
+                <DataTable size='smail' ref={dt} value={products} selection={selectedProducts} onSelectionChange={(e) => setSelectedProducts(e.value)}
                     dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}>

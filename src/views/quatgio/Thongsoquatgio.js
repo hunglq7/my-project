@@ -1,34 +1,22 @@
-import React, { useState, useEffect } from "react"
-import { thongsoquatgioService as quatgioService } from "../../service/quatgio/thongsoquatgioService";
+import React from "react"
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-const Thongsoquatgio = ({ quatgio }) => {
-    const id = 1
-    const [thongsoquatgio, setThongsoquatgio] = useState(null)
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                await quatgioService.getThongsoquatgioById(1).then((data) => setThongsoquatgio(data.data));
-            } catch (error) {
-                console.log(error)
-            }
-        }
-        fetchData()
-    }, []);
+import { useSelector } from "react-redux";
+const Thongsoquatgio = () => {
+
+    const datas = useSelector(state => state.thongsoquatgios.data)
     return (
         <>
-            <div className="container-fluid">
-                <DataTable stripedRows showGridlines value={thongsoquatgio} dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} Thông số kỹ thuật" >
-                    <Column field="noiDung" header="Nội dung" sortable style={{ minWidth: '6rem' }}></Column>
-                    <Column field="donViTinh" header="Đơn vị tính" sortable style={{ minWidth: '16rem' }}></Column>
-                    <Column field="thongSo" header="Thông số" sortable style={{ minWidth: '16rem' }}></Column>
+            <div className="card">
+                <DataTable value={datas} stripedRows tableStyle={{ minWidth: '50rem' }}>
+                    <Column field="noiDung" header="Nội dung"></Column>
+                    <Column field="donViTinh" header="Đơn vị tính"></Column>
+                    <Column field="thongSo" header="Thông số"></Column>
                 </DataTable>
             </div>
         </>
     )
 
 }
-export default Thongsoquatgio
+export default React.memo(Thongsoquatgio)

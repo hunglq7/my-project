@@ -7,7 +7,7 @@ const getThongsoquatgio = async () => {
 
 
 const addThongsoquatgio = async (data) => {
-    return api.post(`Thongsoquatgio/create`, data).then(response => {
+    return api.post(`Thongsoquatgio`, data).then(response => {
         return response
     })
 }
@@ -32,6 +32,13 @@ const getThongsoquatgioById = async (id) => {
     })
 }
 
+const getThongsoquatDetailgioById = async (id) => {
+    return await api.get(`Thongsoquatgio/${id}`).then(response => {
+        return response
+    })
+}
+
+
 
 export const thongsoquatgioService = {
     getThongsoquatgioById,
@@ -40,4 +47,5 @@ export const thongsoquatgioService = {
     updateThongsoquatgio,
     deleteThongsoquatgio,
     deleteSelectThongsoquatgio,
+    getThongsoquatDetailgioById
 }
