@@ -104,6 +104,27 @@ const _nav = [
 
     ],
   },
+  {
+    component: CNavGroup,
+    name: 'Tời điện',
+    to: '/toidien',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [
+
+      {
+        component: CNavItem,
+        name: 'Danh mục tời điện',
+        to: '/toidien/danhmuctoidien',
+      },
+      {
+        component: CNavItem,
+        name: 'Tổng hợp tời điện',
+        to: '/toidien/tonghoptoidien',
+      },
+
+
+    ],
+  },
 
   {
     component: CNavTitle,

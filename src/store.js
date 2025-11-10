@@ -3,6 +3,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import quatgioReducer from '../src/reducer/quatgioSlice'
 import thongsoquatgioReducer from '../src/reducer/thongsoquatgioSlice'
 import nhatkyquatgioReducer from '../src/reducer/nhatkyquatgioSlice'
+import toidienReducer from '../src/reducer/toidienSlice'
 const initialState = {
   sidebarShow: true,
   theme: 'light',
@@ -21,7 +22,8 @@ const store = configureStore({
     Apps: changeState,
     quatgios: quatgioReducer,
     thongsoquatgios: thongsoquatgioReducer,
-    nhatkyquatgios: nhatkyquatgioReducer
+    nhatkyquatgios: nhatkyquatgioReducer,
+    toidiens: toidienReducer
   }
 })
 export default store

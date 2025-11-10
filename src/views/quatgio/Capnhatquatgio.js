@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback, memo } from 'react'
+import 'primeicons/primeicons.css';
+import 'primereact/resources/primereact.css';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
 import {
-    CCard, CCardBody, CCardHeader, CCol, CRow,
-    CButton, CForm, CFormCheck, CFormInput, CFormSelect
+    CCard, CCardBody, CCardHeader, CCol, CRow, CForm, CFormCheck, CFormInput
 } from '@coreui/react'
 import { Message } from 'primereact/message';
 import { DataTable } from 'primereact/datatable';
@@ -13,14 +15,10 @@ import { InputText } from 'primereact/inputtext';
 // import { InputNumber } from 'primereact/inputnumber';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
-import { Dropdown } from 'primereact/dropdown';
 import { classNames } from 'primereact/utils';
-import 'primeicons/primeicons.css';
-import 'primereact/resources/primereact.css';
-import 'primereact/resources/themes/lara-light-indigo/theme.css';
+
 import { DeleteFilled, EditFilled, SaveFilled, UndoOutlined, FileAddFilled, DownloadOutlined } from '@ant-design/icons';
 import { Button, Flex } from 'antd';
-import AppToasts from '../../components/AppToasts';
 import { CTab, CTabContent, CTabList, CTabPanel, CTabs, CPopover } from '@coreui/react'
 import { donviService } from '../../service/donviService';
 import Nhatkyquatgio from './Nhatkyquatgio';
@@ -32,12 +30,12 @@ import { danhmucquatgioService } from '../../service/quatgio/danhmucquatgioServi
 import { getThongsoquatgioById } from '../../reducer/thongsoquatgioSlice';
 import { Toast } from 'primereact/toast';
 function Capnhatquatgio() {
-    const myDate = () => {
-        const date = memo(new Date()).formatDate("dd/mm/yyyy")
-        console.log(date)
-        return date
+    const currentDate = new Date();
+    const newDate = (date) => {
+        const newDate = moment(date).format("yyyy-mm-dd");
+        return newDate
     }
-
+    const myDate = newDate(currentDate);
     let emptyQuatgio = {
         id: 0,
         maQuanLy: '',
@@ -52,10 +50,6 @@ function Capnhatquatgio() {
     };
 
     const [quatgios, setQuatgios] = useState([])
-    const quatgioUpdateToast = AppToasts({ title: "Thông báo", body: `Cập nhật bản ghi thành công` })
-    const quatgioAddToast = AppToasts({ title: "Thông báo", body: "Thêm bản ghi thành công" })
-    const quatgioDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi thành công" })
-    const quatgiosDeleteToast = AppToasts({ title: "Thông báo", body: "Xóa bản ghi được chọn thành công" })
     const [donvis, setDonvis] = useState([]);
     const [danhmucquatgios, setDanhmucquatgios] = useState([]);
     const [quatgioDialog, setQuatgioDialog] = useState(false);
@@ -68,8 +62,8 @@ function Capnhatquatgio() {
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isSave, setIsSave] = useState(false);
+    const [themmoi, setThemmoi] = useState(false);
 
-    const toaster = useRef(null)
     const dt = useRef(null);
     const dispatch = useDispatch();
     const toast = useRef(null);
@@ -78,7 +72,6 @@ function Capnhatquatgio() {
         getDonvis();
         getDanhmucquatgios()
     }, [isSave])
-
     const fetchData = async () => {
         try {
             quatgioService.getQuatgio().then(response => {
@@ -114,7 +107,8 @@ function Capnhatquatgio() {
         setQuatgio(emptyQuatgio);
         setSubmitted(false);
         setQuatgioDialog(true);
-        setIsSave(false);
+        setThemmoi(true)
+        setIsSave(false)
     };
 
     const editQuatgio = (rowData) => {
@@ -138,7 +132,8 @@ function Capnhatquatgio() {
         setQuatgioId(id);
         setSubmitted(true);
         setQuatgioDialog(true);
-        setIsSave(false);
+        setThemmoi(false)
+        setIsSave(false)
     };
 
     const getQuatgioById = (id) => {
@@ -160,7 +155,7 @@ function Capnhatquatgio() {
         let id = quatgio.id;
         quatgioService.deleteQuatgio(id).then(response => {
             if (response) {
-                addToast(quatgioDeleteToast)
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Xóa bản ghi thành công', life: 3000 });
                 setIsSave(true);
             }
         })
@@ -170,15 +165,15 @@ function Capnhatquatgio() {
     };
 
     const onSave = () => {
-        setSubmitted(true)
+
         const _quatgio = quatgio;
-        if (submitted) {
+        if (!themmoi) {
             //Update
             quatgioService.updateTonghopquatgio(_quatgio).then(response => {
                 if (response) {
-                    setIsSave(true)
-                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Cập nhật thành công', life: 3000 });
                     setQuatgioDialog(false)
+                    toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Cập nhật thành công', life: 3000 });
+                    setIsSave(true)
                 }
             })
 
@@ -188,22 +183,22 @@ function Capnhatquatgio() {
             try {
                 quatgioService.addTonghopquatgio(_quatgio).then(response => {
                     if (response) {
-                        setIsSave(true)
+                        setQuatgio(emptyQuatgio)
                         toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Thêm mới thành công', life: 3000 });
+                        setIsSave(true)
                     }
                     else {
                         toast.current.show({ severity: 'error', summary: 'Error', detail: 'Thêm mới thất bại', life: 3000 });
-
                     }
                 })
             }
             catch (error) {
-                toast.current.show({ severity: 'success', summary: 'Successful', detail: { error }, life: 3000 });
+                console.log("Tổng hợp quạt gió- Thêm mới", error)
             }
 
         }
-        setSelectedQuatgios(null)
         setIsSave(false)
+        setSelectedQuatgios(null)
     }
 
     const onInputChange = (e, name) => {
@@ -215,11 +210,8 @@ function Capnhatquatgio() {
 
     const onInputNumberChange = (e, name) => {
         const val = e.target.value || 0;
-        console.log(e)
         let _quatgio = { ...quatgio };
-
         _quatgio[`${name}`] = val;
-
         setQuatgio(_quatgio);
     };
     const ngaylapBodyTemplate = (rowData) => {
@@ -235,12 +227,12 @@ function Capnhatquatgio() {
         let _quatgios = selectedQuatgios;
         quatgioService.deleteQuatgios(_quatgios).then(response => {
             if (response) {
-                addToast(quatgiosDeleteToast)
+                setDeleteQuatgiosDialog(false);
+                toast.current.show({ severity: 'success', summary: 'Successful', detail: 'Xóa bản ghi thành công', life: 3000 });
                 setIsSave(true);
             }
         })
         setIsSave(false);
-        setDeleteQuatgiosDialog(false);
         setSelectedQuatgios(null);
     };
     const exportCSV = () => {
@@ -248,9 +240,10 @@ function Capnhatquatgio() {
     };
 
 
-    const onDuphongChange = (e, name) => {
+    const onCheckedChange = (e, name) => {
+        const val = e.target.checked;
         let _quatgio = { ...quatgio };
-        _quatgio[`${name}`] = e.target.checked;
+        _quatgio[`${name}`] = val;
         setQuatgio(_quatgio);
     };
 
@@ -360,8 +353,7 @@ function Capnhatquatgio() {
                             <strong>Cập nhật bảng</strong> <small>quạt gió</small>
                         </CCardHeader>
                         <CCardBody>
-
-                            <Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>
+                            <Toolbar className="mb-4" start={leftToolbarTemplate} end={rightToolbarTemplate}></Toolbar>
                             <DataTable ref={dt} size='normal' stripedRows rowHover value={quatgios} dataKey="id" selection={selectedQuatgios} onSelectionChange={(e) => setSelectedQuatgios(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
@@ -445,7 +437,7 @@ function Capnhatquatgio() {
                                             <CFormInput value={quatgio.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
                                         </CCol>
                                         <CCol md={12}>
-                                            <CFormCheck checked={quatgio.duPhong} onChange={(e) => onDuphongChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
+                                            <CFormCheck checked={quatgio.duPhong} onChange={(e) => onCheckedChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
                                         </CCol>
                                         <CCol xs={12}>
 
