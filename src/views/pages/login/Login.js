@@ -50,8 +50,11 @@ const Login = () => {
       if (response) {
         navigate("/dashboard")
       }
+      else {
+        toast.current.show({ severity: 'success', summary: 'Thông báo', detail: `Tên đăng nhập hoặc mật khẩu không đúng `, life: 3000 });
+      }
     } catch {
-      toast.current.show({ severity: 'success', summary: 'Thông báo', detail: `Tên đăng nhập hoặc mật khẩu không đúng `, life: 3000 });
+      toast.current.show({ severity: 'success', summary: 'Thông báo', detail: `Mất kết nối tới máy chủ `, life: 3000 });
     }
 
 

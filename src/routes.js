@@ -1,6 +1,7 @@
 import { element } from 'prop-types'
 import React from 'react'
 
+
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'))
 //danhmuc
@@ -16,6 +17,7 @@ const ThongsoQuatgio = React.lazy(() => import('./views/quatgio/Capnhatthongsoqu
 //Tời điện
 const DanhmucToidien = React.lazy(() => import('./views/toidien/Danhmuctoidien'))
 const Tonghoptoidien = React.lazy(() => import('./views/toidien/Tonghoptoidien'))
+const Thongsotoidien = React.lazy(() => import('./views/toidien/Thongsotoidien'))
 
 
 
@@ -39,6 +41,7 @@ const routes = [
   //TỜI ĐIỆN
   { path: '/toidien/danhmuctoidien', name: 'Danh mục tời điện', element: DanhmucToidien },
   { path: '/toidien/tonghoptoidien', name: 'Cập nhật tời điện', element: Tonghoptoidien },
+  { path: '/toidien/thongsotoidien', name: 'Cập nhật tời điện', element: Thongsotoidien },
 
 ]
 

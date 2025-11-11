@@ -4,39 +4,28 @@ import { CRow, CContainer } from '@coreui/react'
 import WidgetThietbi from '../widgets/WidgetThietbi'
 import { useDispatch, useSelector } from 'react-redux'
 import { readAllQuatgio } from '../../reducer/quatgioSlice'
+import { readAllToidien } from '../../reducer/toidienSlice'
 const Dashboard = () => {
   const dispatch = useDispatch()
   useEffect(() => {
-    quatgioData();
+    dispatch(readAllQuatgio());
+    dispatch(readAllToidien());
   }, [])
 
-  const quatgioData = useCallback(async () => {
-    try {
-      dispatch(readAllQuatgio());
-    } catch (error) {
-      console.log(error)
-    }
-  }, [])
+
   //Lấy dữ liệu từ bảng Tonghopquatgio
-  const quatgios = useSelector((state) => state.quatgios.data)
+  const countQuatgio = useSelector((state) => state.quatgios.data)
+  const countToidien = useSelector((state) => state.toidiens.data)
   const Data = myData;
-  //Tạo hàm tính tổng
-  function tinhTong(arr) {
-    let count = 0;
-    for (let i = 0; i < arr.length; i++) {
-      count += arr[i].soLuong;
-    }
-    return count
-  }
-  //Tính tổng số lượng quạt gió
-  const countQuatgio = tinhTong(quatgios);
-  console.log("countQuatgio", countQuatgio)
 
   //Dùng vòng lặp để gán tổng vào myData
   for (let i = 0; i < myData.length; i++) {
     switch (Data[i].name) {
       case "bomnuoc":
         Data[i].sl = countQuatgio
+        break;
+      case "toidien":
+        Data[i].sl = countToidien
         break;
       case "maycao":
         Data[i].sl = 25

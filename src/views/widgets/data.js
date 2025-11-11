@@ -7,9 +7,17 @@ import capdien from '../../assets/images/thietbi/capdien.png'
 import aptomat from '../../assets/images/thietbi/Ap-to-mat.png'
 import maykhoan from '../../assets/images/thietbi/Maykhoan.jpg'
 import khoidongtu from '../../assets/images/thietbi/khoi-dong-tu.jpg'
-
+import toidien from '../../assets/images/thietbi/toidien.jpg'
 
 export const myData = [
+    {
+        image: toidien,
+        name: "toidien",
+        title: "Tời điện",
+        desc: "Tổng số thiết bị",
+        url: "/toidien/capnhattoidien",
+        sl: null
+    },
     {
         image: bomnuoc,
         name: "bomnuoc",

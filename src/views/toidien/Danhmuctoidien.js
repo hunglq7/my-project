@@ -7,6 +7,7 @@ import { AgGridReact } from 'ag-grid-react'; // React Data Grid Component
 import { Button, Flex } from 'antd';
 import { DeleteFilled, FileAddFilled, SaveFilled } from '@ant-design/icons'
 import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
 import { danhmuctoidienService } from '../../service/toidien/danhmuctoidienService';
 ModuleRegistry.registerModules([AllCommunityModule]);
 const Danhmuctoidien = () => {
@@ -132,14 +133,11 @@ const Danhmuctoidien = () => {
             mode: 'multiRow',
         };
     }, []);
-    const pagination = true;
-    const paginationPageSize = 5000;
-    const paginationPageSizeSelector = [10, 20, 50];
-    return (
-        <>
-            <Toast ref={toast} />
+
+    const toidienToolbar = () => {
+        return (
             <Flex wrap gap="small" justify='start' className='mb-2'>
-                <Button color="primary" variant="outlined" icon={<FileAddFilled />} onClick={() => addItems()}>
+                <Button color="cyan" variant="outlined" icon={<FileAddFilled />} onClick={() => addItems()}>
                     Thêm
                 </Button>
                 <Button color="primary" variant="outlined" icon={<SaveFilled />} onClick={Save} >Lưu</Button>
@@ -147,6 +145,17 @@ const Danhmuctoidien = () => {
                     Xóa
                 </Button>
             </Flex>
+        )
+
+    }
+    const pagination = true;
+    const paginationPageSize = 5000;
+    const paginationPageSizeSelector = [10, 20, 50];
+    return (
+        <>
+            <Toast ref={toast} />
+
+            <Toolbar className="mb-4" start={toidienToolbar} ></Toolbar>
 
             <div style={{ height: 800 }}>
                 <AgGridReact className='ag-theme-quartz'

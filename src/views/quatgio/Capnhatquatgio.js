@@ -74,7 +74,7 @@ function Capnhatquatgio() {
     }, [isSave])
     const fetchData = async () => {
         try {
-            quatgioService.getQuatgio().then(response => {
+            await quatgioService.getQuatgio().then(response => {
                 setQuatgios(response.data)
             })
         } catch (error) {
@@ -346,7 +346,6 @@ function Capnhatquatgio() {
             <Toast ref={toast} />
 
             <CRow>
-
                 <CCol xs={12}>
                     <CCard className="mb-4">
                         <CCardHeader>

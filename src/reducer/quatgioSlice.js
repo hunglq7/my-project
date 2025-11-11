@@ -2,7 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import api from '../Utils/Api'
 
 const initialState = {
-    data: [],
+    data: null,
+    count: null,
     loadding: false,
     error: null
 }
@@ -11,7 +12,15 @@ export const readAllQuatgio = createAsyncThunk(
     async (args, { rejectWithValue }) => {
         try {
             const response = await api.get('Tonghopquatgio/getAll');
-            return response.data;
+            function tinhTong(arr) {
+                let count = 0;
+                for (let i = 0; i < arr.length; i++) {
+                    count += arr[i].soLuong;
+                }
+                return count
+            }
+            const countToidien = tinhTong(response.data)
+            return countToidien
         } // Returning only the data
         catch (error) {
             return rejectWithValue(error)
@@ -36,6 +45,7 @@ const quatgioSlice = createSlice({
 
                 state.loadding = false
                 state.data = action.payload
+                state.count = action.payload
             })
             .addCase(readAllQuatgio.rejected, (state, acion) => {
                 state.loadding = false
