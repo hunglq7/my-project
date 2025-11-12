@@ -15,7 +15,7 @@ export const myData = [
         name: "toidien",
         title: "Tời điện",
         desc: "Tổng số thiết bị",
-        url: "/toidien/capnhattoidien",
+        url: "/toidien/tonghoptoidien",
         sl: null
     },
     {

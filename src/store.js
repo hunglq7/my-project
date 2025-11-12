@@ -4,6 +4,7 @@ import quatgioReducer from '../src/reducer/quatgioSlice'
 import thongsoquatgioReducer from '../src/reducer/thongsoquatgioSlice'
 import nhatkyquatgioReducer from '../src/reducer/nhatkyquatgioSlice'
 import toidienReducer from '../src/reducer/toidienSlice'
+import donviReducer from '../src/reducer/donviSlice'
 const initialState = {
   sidebarShow: true,
   theme: 'light',
@@ -23,7 +24,8 @@ const store = configureStore({
     quatgios: quatgioReducer,
     thongsoquatgios: thongsoquatgioReducer,
     nhatkyquatgios: nhatkyquatgioReducer,
-    toidiens: toidienReducer
+    toidiens: toidienReducer,
+    donvis: donviReducer
   }
 })
 export default store

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback, memo } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -20,11 +21,12 @@ import { classNames } from 'primereact/utils';
 import { DeleteFilled, EditFilled, SaveFilled, UndoOutlined, FileAddFilled, DownloadOutlined } from '@ant-design/icons';
 import { Button, Flex } from 'antd';
 import { CTab, CTabContent, CTabList, CTabPanel, CTabs, CPopover } from '@coreui/react'
-import { useDispatch } from 'react-redux';
 import moment from 'moment';
 import { Toast } from 'primereact/toast';
-import { getThongsotoidienById } from '../../reducer/toidienSlice';
+import { getAllDanhmuctoidien, getThongsotoidienById } from '../../reducer/toidienSlice';
 import { tonghoptoidienService } from '../../service/toidien/tonghoptoidienService';
+import { getAllDonvi } from '../../reducer/donviSlice';
+import Thongsotoidien from './Thongsotoidien';
 export default function Tonghoptoidien() {
 
     let emptyToidien = {
@@ -40,10 +42,9 @@ export default function Tonghoptoidien() {
         duPhong: false,
         ghiChu: ''
     };
-
+    const donvis = useSelector((state) => state.donvis.data)
+    const danhmuctoidiens = useSelector((state) => state.toidiens.dataDanhmuc)
     const [toidiens, setToidiens] = useState([])
-    const [donvis, setDonvis] = useState([]);
-    const [danhmuctoidiens, setDanhmuctoidiens] = useState([]);
     const [toidienDialog, setToidienDialog] = useState(false);
     const [deleteToidienDialog, setDeleteToidienDialog] = useState(false);
     const [deleteToidiensDialog, setDeleteToidiensDialog] = useState(false);
@@ -57,10 +58,15 @@ export default function Tonghoptoidien() {
     const [themmoi, setThemmoi] = useState(false);
     const toast = useRef(null);
     const dt = useRef(null);
-
+    const dispatch = useDispatch();
     useEffect(() => {
         fetchData();
     }, [isSave])
+
+    useEffect(() => {
+        dispatch(getAllDonvi())
+        dispatch(getAllDanhmuctoidien())
+    }, [])
     const fetchData = async () => {
         try {
             await tonghoptoidienService.getTonghoptoidien().then(response => {
@@ -147,13 +153,13 @@ export default function Tonghoptoidien() {
         setIsSave(false)
     };
 
-    const editToidien = (rowData) => {
-        dispatch(getThongsotoidienById(rowData.thietBiId))
+    const editToidien = useCallback( (rowData) => {    
+        dispatch(getThongsotoidienById(rowData.thietbiId))
         const id = rowData.id;
-        const idCanTim = rowData.thietBiId;
+        const idCanTim = rowData.thietbiId;
         let ketQua = null;
         for (let i = 0; i < toidiens.length; i++) {
-            if (toidiens[i].thietBiId === idCanTim) {
+            if (toidiens[i].thietbiId === idCanTim) {
                 ketQua = toidiens[i].tenThietBi;
                 break; // dừng vòng lặp khi tìm thấy
             }
@@ -170,7 +176,7 @@ export default function Tonghoptoidien() {
         setToidienDialog(true);
         setThemmoi(false)
         setIsSave(false)
-    };
+    },[]);
     const exportCSV = () => {
         dt.current.exportCSV();
     };
@@ -311,9 +317,12 @@ export default function Tonghoptoidien() {
         </React.Fragment>
     );
 
+ 
+
     return (
         <>
             <Toast ref={toast} />
+          
             <CRow>
                 <CCol xs={12}>
                     <CCard className="mb-4">
@@ -321,14 +330,14 @@ export default function Tonghoptoidien() {
                             <strong>Cập nhật bảng</strong> <small>quạt gió</small>
                         </CCardHeader>
                         <CCardBody>
-                            <Toolbar className="mb-4" start={leftToolbarTemplate} end={rightToolbarTemplate}></Toolbar>
+                            <Toolbar className="mb-2" start={leftToolbarTemplate} end={rightToolbarTemplate}></Toolbar>
                             <DataTable ref={dt} size='normal' stripedRows rowHover value={toidiens} dataKey="id" selection={selectedToidiens} onSelectionChange={(e) => setSelectedToidiens(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >
                                 <Column selectionMode="multiple" exportable={false}></Column>
                                 <Column field="maQuanLy" header="Mã quản lý" sortable style={{ minWidth: '2rem' }}></Column>
                                 <Column field="tenThietBi" header="Thiết bị" sortable style={{ minWidth: '6rem' }}></Column>
-                                <Column field="tenDonVi" header="Đơn vị" sortable style={{ minWidth: '6rem' }}></Column>
+                                <Column field="phongBan" header="Đơn vị" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="viTriLapDat" header="Vị trí lắp đặt" sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="ngayLap" header="Ngày lắp" body={ngaylapBodyTemplate} sortable style={{ minWidth: '6rem' }}></Column>
                                 <Column field="soLuong" header="SL đang dùng" sortable style={{ minWidth: '8rem' }}></Column>
@@ -339,6 +348,120 @@ export default function Tonghoptoidien() {
                     </CCard>
                 </CCol>
             </CRow>
+
+            <Dialog visible={toidienDialog} style={{ width: '64rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa thiết bị: ${tenthietbi}` : `Thêm thiết bị`} modal className="p-fluid" onHide={hideDialog}>
+
+                <CRow className='px-4'>
+                    <CCol>
+                        <CTabs defaultActiveItemKey={1}>
+                            <CTabList variant="underline-border">
+                                <CTab aria-controls="Capnhat-tab-pane" itemKey={1}>Cập nhật tời điện</CTab>
+                                <CTab hidden={!submitted} aria-controls="Nhatky-tab-pane" itemKey={2}>Nhật ký tơi điện</CTab>
+                                <CTab hidden={!submitted} aria-controls="Thongso-tab-pane" itemKey={3}>Thông số ký thuật</CTab>
+
+                            </CTabList>
+                            <CTabContent>
+                                <CTabPanel className="py-3 " aria-labelledby="Capnhat-tab-pane" itemKey={1}>
+                                    <CForm className="row g-3 ">
+                                        <CCol md={6}>
+                                            <CFormInput disabled={true} value={toidien.id} onChange={(e) => onInputChange(e, 'id')} type="text" id="id" label="id:" />
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <CFormInput value={toidien.maQuanLy} onChange={(e) => onInputChange(e, 'maQuanLy')} type="text" id="maQuanLy" label="Mã quản lý:" className={classNames({ 'p-invalid': submitted && !toidien.maQuanLy })} />
+                                            {submitted && !toidien.maQuanLy && <small className="p-error">Mã quản lý phải nhập</small>}
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <div >
+                                                <label className="form-label">Đơn vị:</label>
+                                                <select className='form-select' id="donViId" value={toidien.donViSuDungId} onChange={(e) => onInputChange(e, 'donViSuDungId')} label="Đơn vị">
+                                                    <option value="">--Chọn đơn vị--</option> {/* Optional placeholder */}
+                                                    {donvis.map((option) => (
+                                                        <option key={option.id} value={option.id}>
+                                                            {option.tenPhong}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <div >
+                                                <label className="form-label">Thiết bị:</label>
+                                                <select className='form-select' id="thietBiId" value={toidien.thietbiId} onChange={(e) => onInputChange(e, 'thietBiId')} >
+                                                    <option value="">--Chọn thiết bị--</option> {/* Optional placeholder */}
+                                                    {danhmuctoidiens.map((option) => (
+                                                        < option key={option.id} value={option.id} >
+                                                            {option.tenThietBi}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                        </CCol>
+
+
+                                        <CCol md={12}>
+                                            <CFormInput value={toidien.viTriLapDat} onChange={(e) => onInputChange(e, 'viTriLapDat')} type="text" id="viTriLapDat" label="Vị trí lắp đặt:" />
+                                        </CCol>
+                                        <CCol md={12}>
+                                            <CFormInput value={toidien.tinhTrangThietBi} onChange={(e) => onInputChange(e, 'tinhTrangThietBi')} type="text" id="tinhTrangThietBi" label="Tình trạng:" />
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <CFormInput value={toidien.soLuong} onChange={(e) => onInputNumberChange(e, 'soLuong')} type="number" id="soLuong" label="Số lượng:" />
+                                        </CCol>
+                                        <CCol md={6}>
+                                            <CFormInput value={toidien.ngayLap} onChange={(e) => onInputNumberChange(e, 'ngayLap')} type="date" id="ngayLap" label="Ngày lắp:" />
+                                        </CCol>
+                                        <CCol md={12}>
+                                            <CFormInput value={toidien.mucDichSuDung} onChange={(e) => onInputChange(e, 'mucDichSuDung')} type="text" id="mucDichSuDung" label="Mục đích sử dụng:" />
+                                        </CCol>
+                                        <CCol md={12}>
+                                            <CFormCheck checked={toidien.duPhong} onChange={(e) => onCheckedChange(e, 'duPhong')} type="checkbox" id="duPhong" label="Dự phòng" />
+                                        </CCol>
+                                        <CCol xs={12}>
+
+                                            <Flex wrap gap="small" justify='start' className='mt-3'>
+                                                <Button type="primary" icon={<SaveFilled />} onClick={onSave}>
+                                                    Lưu
+                                                </Button>
+                                                <Button color="danger" variant="outlined" icon={<UndoOutlined />} onClick={hideDialog}>
+                                                    Không
+                                                </Button>
+                                            </Flex>
+                                        </CCol>
+                                    </CForm>
+                                </CTabPanel>
+                                <CTabPanel className="py-3 " aria-labelledby="Nhatky-tab-pane" itemKey={2}>
+
+                                </CTabPanel>
+                                <CTabPanel className="py-3" aria-labelledby="Thongso-tab-pane" itemKey={3}>
+                                    <Thongsotoidien />
+                                </CTabPanel>
+
+                            </CTabContent>
+                        </CTabs>
+                    </CCol>
+                </CRow>
+            </Dialog >
+
+            <Dialog visible={deleteToidienDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteToidienDialogFooter} onHide={hideDeleteToidienDialog}>
+                <div className="confirmation-content">
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                    {toidien && (
+                        <span>
+                            Bạn có chắc chắn muốn xóa <b>{toidien.maQuanLy}</b>?
+                        </span>
+                    )}
+
+                </div>
+            </Dialog>
+
+            <Dialog visible={deleteToidiensDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteToidiensDialogFooter} onHide={hideDeleteToidiensDialog}>
+                <div className="confirmation-content">
+                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                    {toidien && <span>Bạn có chắc chắn muốn xóa các chức vụ đã chọn không?</span>}
+                </div>
+            </Dialog>
 
         </>
     )

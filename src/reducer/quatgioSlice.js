@@ -12,15 +12,7 @@ export const readAllQuatgio = createAsyncThunk(
     async (args, { rejectWithValue }) => {
         try {
             const response = await api.get('Tonghopquatgio/getAll');
-            function tinhTong(arr) {
-                let count = 0;
-                for (let i = 0; i < arr.length; i++) {
-                    count += arr[i].soLuong;
-                }
-                return count
-            }
-            const countToidien = tinhTong(response.data)
-            return countToidien
+            return response.data
         } // Returning only the data
         catch (error) {
             return rejectWithValue(error)
@@ -42,10 +34,17 @@ const quatgioSlice = createSlice({
                 state.loadding = true
             })
             .addCase(readAllQuatgio.fulfilled, (state, action) => {
-
+                function tinhTong(arr) {
+                    let count = 0;
+                    for (let i = 0; i < arr.length; i++) {
+                        count += arr[i].soLuong;
+                    }
+                    return count
+                }
+                const countToidien = tinhTong(action.payload)
                 state.loadding = false
                 state.data = action.payload
-                state.count = action.payload
+                state.count = countToidien
             })
             .addCase(readAllQuatgio.rejected, (state, acion) => {
                 state.loadding = false

@@ -118,7 +118,7 @@ const _nav = [
       },
       {
         component: CNavItem,
-        name: 'Tổng hợp tời điện',
+        name: 'Cập nhật tời điện',
         to: '/toidien/tonghoptoidien',
       },
       {

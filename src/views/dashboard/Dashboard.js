@@ -13,11 +13,10 @@ const Dashboard = () => {
   }, [])
 
 
-  //Lấy dữ liệu từ bảng Tonghopquatgio
-  const countQuatgio = useSelector((state) => state.quatgios.data)
-  const countToidien = useSelector((state) => state.toidiens.data)
+  //Lấy dữ liệu từ Slice
+  const countQuatgio = useSelector((state) => state.quatgios.count)
+  const countToidien = useSelector((state) => state.toidiens.count)
   const Data = myData;
-
   //Dùng vòng lặp để gán tổng vào myData
   for (let i = 0; i < myData.length; i++) {
     switch (Data[i].name) {
@@ -28,10 +27,10 @@ const Dashboard = () => {
         Data[i].sl = countToidien
         break;
       case "maycao":
-        Data[i].sl = 25
+        Data[i].sl = null
         break;
       case "bangtai":
-        Data[i].sl = 150
+        Data[i].sl = null
         break;
       default:
         Data[i].sl = null
@@ -52,4 +51,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default React.memo(Dashboard) 

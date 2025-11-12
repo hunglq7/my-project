@@ -17,7 +17,7 @@ const ThongsoQuatgio = React.lazy(() => import('./views/quatgio/Capnhatthongsoqu
 //Tời điện
 const DanhmucToidien = React.lazy(() => import('./views/toidien/Danhmuctoidien'))
 const Tonghoptoidien = React.lazy(() => import('./views/toidien/Tonghoptoidien'))
-const Thongsotoidien = React.lazy(() => import('./views/toidien/Thongsotoidien'))
+const Thongsotoidien = React.lazy(() => import('./views/toidien/Capnhatthongsotoidien'))
 
 
 
@@ -41,7 +41,7 @@ const routes = [
   //TỜI ĐIỆN
   { path: '/toidien/danhmuctoidien', name: 'Danh mục tời điện', element: DanhmucToidien },
   { path: '/toidien/tonghoptoidien', name: 'Cập nhật tời điện', element: Tonghoptoidien },
-  { path: '/toidien/thongsotoidien', name: 'Cập nhật tời điện', element: Thongsotoidien },
+  { path: '/toidien/thongsotoidien', name: 'Cập nhật thông số tời điện', element: Thongsotoidien },
 
 ]
 

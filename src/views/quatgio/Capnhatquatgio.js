@@ -460,14 +460,8 @@ function Capnhatquatgio() {
 
                             </CTabContent>
                         </CTabs>
-
-
-
                     </CCol>
                 </CRow>
-
-
-
             </Dialog >
 
             <Dialog visible={deleteQuatgioDialog} style={{ width: '32rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header="Xác nhận" modal footer={deleteQuatgioDialogFooter} onHide={hideDeleteQuatgioDialog}>

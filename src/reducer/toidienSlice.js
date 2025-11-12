@@ -3,7 +3,9 @@ import { danhmuctoidienService } from '../service/toidien/danhmuctoidienService'
 import { thongsotoidienService } from '../service/toidien/thongsotoidienService'
 import { tonghoptoidienService } from '../service/toidien/tonghoptoidienService'
 const initialState = {
-    data: null,
+    data: [],
+    dataDanhmuc: [],
+    dataThongso: [],
     count: 0,
     loadding: false,
     error: null
@@ -14,15 +16,7 @@ export const readAllToidien = createAsyncThunk(
     async (args, { rejectWithValue }) => {
         try {
             const response = await tonghoptoidienService.getTonghoptoidien();
-            function tinhTong(arr) {
-                let count = 0;
-                for (let i = 0; i < arr.length; i++) {
-                    count += arr[i].soLuong;
-                }
-                return count
-            }
-            const countToidien = tinhTong(response.data)
-            return countToidien;
+            return response.data;
 
         } // Returning only the data
         catch (error) {
@@ -65,7 +59,7 @@ export const getThongsotoidienById = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
 
-            const response = await thongsotoidienService.getThongsotoidienById(id);
+            const response = await thongsotoidienService.getThongsotoidienDetailById(id);
             return response.data
 
         } // Returning only the data
@@ -92,7 +86,7 @@ const toidienSlice = createSlice({
             .addCase(getAllDanhmuctoidien.fulfilled, (state, action) => {
 
                 state.loadding = false
-                state.data = action.payload
+                state.dataDanhmuc = action.payload
             })
             .addCase(getAllDanhmuctoidien.rejected, (state, acion) => {
                 state.loadding = false
@@ -116,7 +110,7 @@ const toidienSlice = createSlice({
             .addCase(getThongsotoidienById.fulfilled, (state, action) => {
 
                 state.loadding = false
-                state.data = action.payload
+                state.dataThongso = action.payload
             })
             .addCase(getThongsotoidienById.rejected, (state, acion) => {
                 state.loadding = false
@@ -127,10 +121,17 @@ const toidienSlice = createSlice({
                 state.loadding = true
             })
             .addCase(readAllToidien.fulfilled, (state, action) => {
-
+                function tinhTong(arr) {
+                    let count = 0;
+                    for (let i = 0; i < arr.length; i++) {
+                        count += arr[i].soLuong;
+                    }
+                    return count
+                }
+                const countToidien = tinhTong(action.payload)
                 state.loadding = false
                 state.data = action.payload
-                state.count = action.payload
+                state.count = countToidien
             })
             .addCase(readAllToidien.rejected, (state, acion) => {
                 state.loadding = false

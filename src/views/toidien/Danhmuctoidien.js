@@ -155,8 +155,7 @@ const Danhmuctoidien = () => {
         <>
             <Toast ref={toast} />
 
-            <Toolbar className="mb-4" start={toidienToolbar} ></Toolbar>
-
+            <Toolbar className="mb-2 " start={toidienToolbar} ></Toolbar>
             <div style={{ height: 800 }}>
                 <AgGridReact className='ag-theme-quartz'
                     ref={gridRef}

@@ -27,13 +27,13 @@ const deleteSelectThongsotoidien = async (data) => {
     })
 }
 const getThongsotoidienById = async (id) => {
-    return await api.get(`Thongsokythuattoitruc/DetailById/${id}`).then(response => {
+    return await api.get(`Thongsokythuattoitruc/${id}`).then(response => {
         return response
     })
 }
 
-const getThongsotoidienDetailgioById = async (id) => {
-    return await api.get(`Thongsokythuattoitruc/${id}`).then(response => {
+const getThongsotoidienDetailById = async (id) => {
+    return await api.get(`Thongsokythuattoitruc/DetailById/${id}`).then(response => {
         return response
     })
 }
@@ -47,5 +47,5 @@ export const thongsotoidienService = {
     updateThongsotoidien,
     deleteThongsotoidien,
     deleteSelectThongsotoidien,
-    getThongsotoidienDetailgioById
+    getThongsotoidienDetailById
 }
