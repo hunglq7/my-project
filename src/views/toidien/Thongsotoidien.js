@@ -28,4 +28,4 @@ const Thongsotoidien = () => {
     )
 
 }
-export default React.memo(Thongsotoidien)
+export default Thongsotoidien

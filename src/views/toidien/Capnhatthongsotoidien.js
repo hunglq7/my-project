@@ -267,7 +267,7 @@ export default function Capnhatthongsotoidien() {
                             <strong>Cập nhật bảng</strong> <small>Thông số quạt gió</small>
                         </CCardHeader>
                         <CCardBody>
-                            <Toolbar className="mb-4" top={leftToolbarTemplate} end={rightToolbarTemplate}></Toolbar>
+                            <Toolbar className="mb-4" start={leftToolbarTemplate} end={rightToolbarTemplate}></Toolbar>
                             <DataTable ref={dt} stripedRows rowHover value={thongsotoidiens} dataKey="id" selection={selectedThongsotoidiens} onSelectionChange={(e) => setSelectedThongsotoidiens(e.value)} paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                                 currentPageReportTemplate="Hiện {first} to {last} of {totalRecords} bản ghi" globalFilter={globalFilter} header={header} >

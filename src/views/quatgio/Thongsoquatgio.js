@@ -19,4 +19,4 @@ const Thongsoquatgio = () => {
     )
 
 }
-export default React.memo(Thongsoquatgio)
+export default Thongsoquatgio

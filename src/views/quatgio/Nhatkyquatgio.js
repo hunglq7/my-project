@@ -175,4 +175,4 @@ function Nhatkyquatgio({ quatgio }) {
         </>
     )
 }
-export default React.memo(Nhatkyquatgio)
+export default Nhatkyquatgio

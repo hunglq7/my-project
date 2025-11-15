@@ -48,11 +48,6 @@ const _nav = [
         name: 'Đơn vị',
         to: '/donvi/donvi',
       },
-      {
-        component: CNavItem,
-        name: 'product',
-        to: '/product/product',
-      },
 
     ],
   },
@@ -75,6 +70,11 @@ const _nav = [
         component: CNavItem,
         name: 'Danh mục máy cào',
         to: '/maycao/danhmucmaycao',
+      },
+      {
+        component: CNavItem,
+        name: 'Thông số máy cào',
+        to: '/maycao/thongsomaycao',
       },
 
 

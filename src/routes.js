@@ -1,3 +1,4 @@
+import path from 'path'
 import { element } from 'prop-types'
 import React from 'react'
 
@@ -10,6 +11,7 @@ const Donvi = React.lazy(() => import('./views/danhmuc/donvi/Donvi'))
 //máy cào
 const Maycao = React.lazy(() => import('./views/maycao/Capnhatmaycao'))
 const DanhmucMaycao = React.lazy(() => import('./views/maycao/Capnhatdanhmucmaycao'))
+const Thongsomaycao = React.lazy(() => import('./views/maycao/Capnhatthongsomaycao'))
 //Quạt gió
 const Quatgio = React.lazy(() => import('./views/quatgio/Capnhatquatgio'))
 const DanhmucQuatgio = React.lazy(() => import('./views/quatgio/Capnhatdanhmucquatgio'))
@@ -33,6 +35,7 @@ const routes = [
   //MÁy CÀO
   { path: '/maycao/capnhatmaycao', name: 'Cập nhật máy cào', element: Maycao },
   { path: '/maycao/danhmucmaycao', name: 'Danh mục máy cào', element: DanhmucMaycao },
+  { path: '/maycao/thongsomaycao', name: 'Thông số máy cào', element: Thongsomaycao },
   //QUẠT GIÓ
   { path: '/quatgio/danhmucmaycao', name: 'Danh mục máy cào', element: DanhmucMaycao },
   { path: '/quatgio/capnhatquatgio', name: 'Cập nhật quạt gió', element: Quatgio },
