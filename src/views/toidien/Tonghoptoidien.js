@@ -153,7 +153,7 @@ export default function Tonghoptoidien() {
         setIsSave(false)
     };
 
-    const editToidien = useCallback( (rowData) => {    
+    const editToidien = useCallback((rowData) => {
         dispatch(getThongsotoidienById(rowData.thietbiId))
         const id = rowData.id;
         const idCanTim = rowData.thietbiId;
@@ -176,7 +176,7 @@ export default function Tonghoptoidien() {
         setToidienDialog(true);
         setThemmoi(false)
         setIsSave(false)
-    },[]);
+    }, []);
     const exportCSV = () => {
         dt.current.exportCSV();
     };
@@ -317,12 +317,12 @@ export default function Tonghoptoidien() {
         </React.Fragment>
     );
 
- 
+
 
     return (
         <>
             <Toast ref={toast} />
-          
+
             <CRow>
                 <CCol xs={12}>
                     <CCard className="mb-4">

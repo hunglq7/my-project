@@ -36,7 +36,7 @@ const _nav = [
     component: CNavGroup,
     name: 'Danh mục',
     to: '/danhmuc',
-    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    icon: <CIcon icon={cilNotes} customClassName="nav-icon" />,
     items: [
       {
         component: CNavItem,
