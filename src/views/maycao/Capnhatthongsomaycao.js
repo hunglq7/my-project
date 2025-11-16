@@ -12,6 +12,7 @@ import { Dialog } from 'primereact/dialog';
 import { Button, Checkbox, Form, Input, Flex, Select } from 'antd';
 import { useEffect, useRef, useState } from "react"
 import { thongsomaycaoService } from "../../service/maycao/thongsomaycaoService"
+import { danhmucmaycaoService } from "../../service/maycao/danhmucmaycaoService"
 import { FileAddFilled, DeleteFilled, DownOutlined, CloseOutlined, SaveFilled } from '@ant-design/icons'
 import { Dropdown } from 'primereact/dropdown';
 
@@ -34,6 +35,7 @@ const Capnhatthongsomaycao = () => {
     const [thongsomaycaos, setThongsomaycaos] = useState([]);
     const [thongsomaycao, setThongsomaycao] = useState(emptyThongsomaycao);
     const [thongsomaycaoId, setThongsomaycaoId] = useState(null);
+    const [danhmucmaycaos, setDanhmucmaycaos] = useState([]);
     const [selectedThongsomaycaos, setSelectedThongsomaycaos] = useState(null);
     const [thongsomaycaoDialog, setThongsomaycaoDialog] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -41,11 +43,17 @@ const Capnhatthongsomaycao = () => {
     const [isSave, setIsSave] = useState(false);
     const toast = useRef(null);
     const dt = useRef(null);
-
+    const [form] = Form.useForm();
 
     useEffect(() => {
         fetchData();
     }, [isSave])
+
+    useEffect(() => {
+        danhmucmaycaoService.getDanhmucmaycaos().then(response => {
+            setDanhmucmaycaos(response.data)
+        })
+    }, [])
 
     async function fetchData() {
         try {
@@ -62,6 +70,12 @@ const Capnhatthongsomaycao = () => {
     const openNew = () => {
         setThongsomaycaoId(0)
         setThongsomaycao(emptyThongsomaycao);
+        form.setFieldsValue({
+            mayCaoId: null,
+            noiDung: "",
+            donViTinh: "",
+            thongSo: "",
+        });
         setSubmitted(false);
         setThongsomaycaoDialog(true);
         setIsSave(false);
@@ -74,8 +88,15 @@ const Capnhatthongsomaycao = () => {
         setThongsomaycao(_items);
     };
 
+    const onSelectChange = (e, name) => {
+        let _items = { ...thongsomaycao };
+        _items[name] = e.value.id;
+        setThongsomaycao(_items);
+    };
+
 
     const save = () => {
+        setSubmitted(true);
         console.log(thongsomaycao)
     }
     const hideDialog = () => {
@@ -155,47 +176,60 @@ const Capnhatthongsomaycao = () => {
 
             <Dialog visible={thongsomaycaoDialog} style={{ width: '42rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa bản ghi` : "Thêm thông số"} modal className="p-fluid" footer={thongsomaycaoDialogFooter} onHide={hideDialog}>
                 <Form
+                    form={form}
                     name="basic"
-                    labelCol={{ span: 8 }}
-                    wrapperCol={{ span: 16 }}
+                    labelCol={{ span: 5 }}
+                    wrapperCol={{ span: 19 }}
                     style={{ maxWidth: 600 }}
                     initialValues={{ remember: true }}
                     autoComplete="off"
                 >
-
-
-
                     <Form.Item
                         label="Thiết bị"
                         name="mayCaoId"
-                        rules={[{ required: true, message: 'Thông số phải nhập!' }]}
+                        rules={[{ required: true, message: 'Thiết bị phải nhập' }]}
                     >
-
-                        <Dropdown style={{ height: '36px' }} value={selectedCity} onChange={(e) => setSelectedCity(e.value)} options={cities} optionLabel="name"
-                            placeholder="Select a City" className="w-full md:w-14rem" />
+                        <Dropdown style={{ height: '36px' }} value={thongsomaycao.mayCaoId || null} onChange={(e) => {
+                            form.setFieldValue("mayCaoId", e.value);
+                            setThongsomaycao({ ...thongsomaycao, mayCaoId: e.value });
+                        }} options={danhmucmaycaos} optionLabel="tenThietBi"
+                            placeholder="Chọn thiết bị" className="w-full md:w-14rem" />
                     </Form.Item>
                     <Form.Item
                         label="Nội dung"
                         name="noiDung"
-                        style={{ fontFamily: "sans-serif", fontSize: 64, fontWeight: 'bold' }}
                         rules={[{ required: true, message: 'Nội dung phải nhập!' }]}
                     >
-                        <InputText style={{ height: '36px' }} value={thongsomaycao.noiDung} onChange={(e) => onInputChange(e, 'noiDung')} />
+                        <InputText style={{ height: '36px' }} value={thongsomaycao.noiDung}
+                            onChange={(e) => {
+                                form.setFieldValue("noiDung", e.target.value);
+                                onInputChange(e, "noiDung");
+                            }}
+                        />
                     </Form.Item>
                     <Form.Item
                         label="Đơn vị tính"
                         name="donViTinh"
                         rules={[{ required: true, message: 'Đơn vị tính phải nhập!' }]}
                     >
-                        <InputText style={{ height: '36px' }} value={thongsomaycao.donViTinh} onChange={(e) => onInputChange(e, 'donViTinh')} />
+                        <InputText style={{ height: '36px' }} value={thongsomaycao.donViTinh}
+                            onChange={(e) => {
+                                form.setFieldValue("donVITinh", e.target.value);
+                                onInputChange(e, "donViTinh");
+                            }}
+                        />
                     </Form.Item>
                     <Form.Item
                         label="Thông số"
                         name="thongSo"
                         rules={[{ required: true, message: 'Thông số phải nhập!' }]}
                     >
-
-                        <InputText style={{ height: '36px' }} value={thongsomaycao.thongSo} onChange={(e) => onInputChange(e, 'thongSo')} />
+                        <InputText style={{ height: '36px' }} value={thongsomaycao.thongSo}
+                            onChange={(e) => {
+                                form.setFieldValue("thongSo", e.target.value);
+                                onInputChange(e, "thongSo");
+                            }}
+                        />
                     </Form.Item>
 
 
