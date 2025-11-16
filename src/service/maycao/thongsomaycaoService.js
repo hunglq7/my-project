@@ -7,7 +7,7 @@ const getThongsomaycao = async () => {
 
 
 const addThongsomaycao = async (data) => {
-    return api.post(`Thongsokythuatmaycao`, data).then(response => {
+    return await api.post(`Thongsokythuatmaycao`, data).then(response => {
         return response
     })
 }

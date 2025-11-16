@@ -1,6 +1,7 @@
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
+import React from 'react';
 import { CRow, CCol, CCard, CCardHeader, CCardBody } from "@coreui/react"
 import { Toolbar } from "primereact/toolbar"
 import { Column } from "primereact/column"
@@ -8,29 +9,24 @@ import { DataTable } from "primereact/datatable"
 import { IconField } from "primereact/iconfield"
 import { InputText } from "primereact/inputtext"
 import { InputIcon } from "primereact/inputicon"
+import { classNames } from 'primereact/utils';
 import { Dialog } from 'primereact/dialog';
-import { Button, Checkbox, Form, Input, Flex, Select } from 'antd';
+import { Button, Checkbox, Form, Input, Flex, Select, Row, Col } from 'antd';
 import { useEffect, useRef, useState } from "react"
 import { thongsomaycaoService } from "../../service/maycao/thongsomaycaoService"
 import { danhmucmaycaoService } from "../../service/maycao/danhmucmaycaoService"
-import { FileAddFilled, DeleteFilled, DownOutlined, CloseOutlined, SaveFilled } from '@ant-design/icons'
+import { FileAddFilled, DeleteFilled, DownOutlined, CloseOutlined, SaveFilled, EditFilled } from '@ant-design/icons'
 import { Dropdown } from 'primereact/dropdown';
-
+import { Toast } from 'primereact/toast';
 const Capnhatthongsomaycao = () => {
-    const emptyThongsomaycao = {
+    let emptyThongsomaycao = {
         id: 0,
         mayCaoId: 0,
         noiDung: "",
         donViTinh: "",
         thongSo: ""
     };
-    const cities = [
-        { name: 'New York', code: 'NY' },
-        { name: 'Rome', code: 'RM' },
-        { name: 'London', code: 'LDN' },
-        { name: 'Istanbul', code: 'IST' },
-        { name: 'Paris', code: 'PRS' }
-    ];
+
     const [selectedCity, setSelectedCity] = useState(null);
     const [thongsomaycaos, setThongsomaycaos] = useState([]);
     const [thongsomaycao, setThongsomaycao] = useState(emptyThongsomaycao);
@@ -41,9 +37,10 @@ const Capnhatthongsomaycao = () => {
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState(null);
     const [isSave, setIsSave] = useState(false);
+    const [themmoi, setThemmoi] = useState(false);
     const toast = useRef(null);
     const dt = useRef(null);
-    const [form] = Form.useForm();
+
 
     useEffect(() => {
         fetchData();
@@ -68,14 +65,9 @@ const Capnhatthongsomaycao = () => {
 
 
     const openNew = () => {
-        setThongsomaycaoId(0)
+        setThemmoi(true);
+        setThongsomaycaoId(0);
         setThongsomaycao(emptyThongsomaycao);
-        form.setFieldsValue({
-            mayCaoId: null,
-            noiDung: "",
-            donViTinh: "",
-            thongSo: "",
-        });
         setSubmitted(false);
         setThongsomaycaoDialog(true);
         setIsSave(false);
@@ -97,8 +89,30 @@ const Capnhatthongsomaycao = () => {
 
     const save = () => {
         setSubmitted(true);
-        console.log(thongsomaycao)
+        if (themmoi) {
+            thongsomaycaoService.addThongsomaycao(thongsomaycao).then((response) => {
+                if (response) {
+                    setIsSave(true);
+                    toast.current.show({ severity: 'success', summary: 'Success', detail: `Thêm bản ghi thành công`, life: 3000 });
+                }
+            })
+        }
+        setThongsomaycao(emptyThongsomaycao);
+
     }
+
+    const onDelete = () => {
+        let id = thongsomaycao;
+        thongsomaycaoService.deleteThongsomaycao(id).then(response => {
+            if (response) {
+                toast.current.show({ severity: 'success', summary: 'Success', detail: `Xóa thành công bản ghi`, life: 3000 });
+                setIsSave(true);
+            }
+        })
+        setIsSave(false);
+        setDeleteThongsomaycaoDialog(false);
+        setThongsomaycao(emptyThongsoquatgio);
+    };
     const hideDialog = () => {
         setSubmitted(false);
         setThongsomaycaoDialog(false);
@@ -151,7 +165,7 @@ const Capnhatthongsomaycao = () => {
     return (
         <>
 
-
+            <Toast ref={toast} />
             <CRow>
                 <CCol xs={12}>
                     <CCard className="mb-4">
@@ -174,14 +188,12 @@ const Capnhatthongsomaycao = () => {
                 </CCol>
             </CRow>
 
-            <Dialog visible={thongsomaycaoDialog} style={{ width: '42rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa bản ghi` : "Thêm thông số"} modal className="p-fluid" footer={thongsomaycaoDialogFooter} onHide={hideDialog}>
-                <Form
-                    form={form}
+            <Dialog visible={thongsomaycaoDialog} style={{ width: '36rem' }} breakpoints={{ '960px': '75vw', '641px': '90vw' }} header={submitted ? `Sửa bản ghi` : "Thêm thông số"} modal className="p-fluid" footer={thongsomaycaoDialogFooter} onHide={hideDialog}>
+                {/* <Form
                     name="basic"
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 19 }}
                     style={{ maxWidth: 600 }}
-                    initialValues={{ remember: true }}
                     autoComplete="off"
                 >
                     <Form.Item
@@ -190,8 +202,8 @@ const Capnhatthongsomaycao = () => {
                         rules={[{ required: true, message: 'Thiết bị phải nhập' }]}
                     >
                         <Dropdown style={{ height: '36px' }} value={thongsomaycao.mayCaoId || null} onChange={(e) => {
-                            form.setFieldValue("mayCaoId", e.value);
-                            setThongsomaycao({ ...thongsomaycao, mayCaoId: e.value });
+                            onSelectChange(e, 'mayCaoId')
+
                         }} options={danhmucmaycaos} optionLabel="tenThietBi"
                             placeholder="Chọn thiết bị" className="w-full md:w-14rem" />
                     </Form.Item>
@@ -200,9 +212,9 @@ const Capnhatthongsomaycao = () => {
                         name="noiDung"
                         rules={[{ required: true, message: 'Nội dung phải nhập!' }]}
                     >
-                        <InputText style={{ height: '36px' }} value={thongsomaycao.noiDung}
+                        <InputText style={{ height: '36px' }} value={thongsomaycao.noiDung ?? ''}
                             onChange={(e) => {
-                                form.setFieldValue("noiDung", e.target.value);
+
                                 onInputChange(e, "noiDung");
                             }}
                         />
@@ -212,9 +224,9 @@ const Capnhatthongsomaycao = () => {
                         name="donViTinh"
                         rules={[{ required: true, message: 'Đơn vị tính phải nhập!' }]}
                     >
-                        <InputText style={{ height: '36px' }} value={thongsomaycao.donViTinh}
+                        <InputText style={{ height: '36px' }} value={thongsomaycao.donViTinh ?? ''}
                             onChange={(e) => {
-                                form.setFieldValue("donVITinh", e.target.value);
+
                                 onInputChange(e, "donViTinh");
                             }}
                         />
@@ -224,9 +236,8 @@ const Capnhatthongsomaycao = () => {
                         name="thongSo"
                         rules={[{ required: true, message: 'Thông số phải nhập!' }]}
                     >
-                        <InputText style={{ height: '36px' }} value={thongsomaycao.thongSo}
+                        <InputText style={{ height: '36px' }} value={thongsomaycao.thongSo ?? ''}
                             onChange={(e) => {
-                                form.setFieldValue("thongSo", e.target.value);
                                 onInputChange(e, "thongSo");
                             }}
                         />
@@ -234,7 +245,55 @@ const Capnhatthongsomaycao = () => {
 
 
 
-                </Form>
+                </Form> */}
+                <Row className='flex align-items-center justify-content-center mb-3'>
+                    <Col span={6}>
+                        <label htmlFor="mayCaoId" className="font-bold ">
+                            Thiết bị
+                        </label>
+                    </Col>
+                    <Col span={16}>
+                        <Dropdown style={{ height: 36 }} value={thongsomaycao.mayCaoId || null} onChange={(e) => {
+                            onSelectChange(e, 'mayCaoId')
+
+                        }} options={danhmucmaycaos} optionLabel="tenThietBi"
+                            placeholder="Chọn thiết bị" className="w-full md:w-14rem" />
+                    </Col>
+                </Row>
+                <Row className='flex align-items-center justify-content-center mb-3'>
+                    <Col span={6}>
+                        <label htmlFor="noiDung" className="font-bold ">
+                            Nội dung
+                        </label>
+                    </Col>
+                    <Col span={16}>
+                        <InputText style={{ height: 36 }} id="noiDung" value={thongsomaycao.noiDung ?? ''} onChange={(e) => onInputChange(e, 'noiDung')} required autoFocus className={classNames({ 'p-invalid': submitted && !thongsomaycao.noiDung })} />
+                        {submitted && !thongsomaycao.noiDung && <small className="p-error">Nội dung phải nhập.</small>}
+                    </Col>
+                </Row>
+                <Row className='flex align-items-center justify-content-center mb-3'>
+                    <Col span={6}>
+                        <label htmlFor="donViTinh" className="font-bold">
+                            Đơn vị tính
+                        </label>
+                    </Col>
+                    <Col span={16}>
+                        <InputText style={{ height: 36 }} id="donViTinh" value={thongsomaycao.donViTinh ?? ''} onChange={(e) => onInputChange(e, 'donViTinh')} required autoFocus className={classNames({ 'p-invalid': submitted && !thongsomaycao.donViTinh })} />
+                        {submitted && !thongsomaycao.donViTinh && <small className="p-error">Đơn vị tính phải nhập.</small>}
+                    </Col>
+                </Row>
+                <Row className='flex align-items-center justify-content-center mb-3'>
+                    <Col span={6}>
+                        <label htmlFor="thongSo" className="font-bold">
+                            Thông số
+                        </label>
+                    </Col>
+                    <Col span={16}>
+                        <InputText style={{ height: 36 }} id="thongSo" value={thongsomaycao.thongSo ?? ''} onChange={(e) => onInputChange(e, 'thongSo')} required autoFocus className={classNames({ 'p-invalid': submitted && !thongsomaycao.thongSo })} />
+                        {submitted && !thongsomaycao.thongSo && <small className="p-error">Đơn vị tính phải nhập.</small>}
+                    </Col>
+                </Row>
+
             </Dialog>
 
         </>

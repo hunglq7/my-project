@@ -19,6 +19,7 @@ import { thongsotoidienService } from '../../service/toidien/thongsotoidienServi
 import { danhmuctoidienService } from '../../service/toidien/danhmuctoidienService';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllDanhmuctoidien } from '../../reducer/toidienSlice';
+
 export default function Capnhatthongsotoidien() {
 
     const emptyThongsotoidien = {
@@ -206,7 +207,7 @@ export default function Capnhatthongsotoidien() {
         return (
             <Flex wrap gap="small">
                 <Button color="primary" label="Thêm" variant="solid" icon={<FileAddFilled />} onClick={() => openNew()} >Thêm</Button>
-                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedThongsotoidiens || !selectedThongsoquatgios.length}  > Xóa</Button>
+                <Button color="danger" variant="solid" icon={<DeleteFilled />} onClick={confirmDeleteSelected} disabled={!selectedThongsotoidiens || !selectedThongsotoidiens.length}  > Xóa</Button>
             </Flex>
         );
     };
@@ -260,6 +261,7 @@ export default function Capnhatthongsotoidien() {
 
     return (
         <>
+
             <CRow>
                 <CCol xs={12}>
                     <CCard className="mb-4">
