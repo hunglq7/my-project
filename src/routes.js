@@ -36,6 +36,7 @@ const routes = [
   { path: '/maycao/capnhatmaycao', name: 'Cập nhật máy cào', element: Maycao },
   { path: '/maycao/danhmucmaycao', name: 'Danh mục máy cào', element: DanhmucMaycao },
   { path: '/maycao/thongsomaycao', name: 'Thông số máy cào', element: Thongsomaycao },
+
   //QUẠT GIÓ
   { path: '/quatgio/danhmucmaycao', name: 'Danh mục máy cào', element: DanhmucMaycao },
   { path: '/quatgio/capnhatquatgio', name: 'Cập nhật quạt gió', element: Quatgio },

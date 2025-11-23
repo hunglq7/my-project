@@ -75,9 +75,7 @@ const _nav = [
         component: CNavItem,
         name: 'Thông số máy cào',
         to: '/maycao/thongsomaycao',
-      },
-
-
+      }, 
 
     ],
   },
