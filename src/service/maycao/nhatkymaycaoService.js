@@ -6,33 +6,32 @@ const getNhatkyById = async (id) => {
     })
 }
 
-
 const addNhatkymaycaos = async (datas) => {
-debugger;
     return await api.put(`Nhatkymaycao/UpdateMultiple`, datas).then(response => {
         return response
     })
 }
 const addNhatkymaycao = async (data) => {
-  
-    const response = await fetch(`${baseURL}/Nhatkymaycao`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
+    return await api.post(`Nhatkymaycao/Add`, data).then(response => {
+        return response
     })
-    try {
-        const json = await response.json()
-        return json
-    }
-    catch (error) {
-        return console.log(error)
-    }
-
 }
+
+const updateNhatkymaycao = async (data) => {
+    return await api.put(`Nhatkymaycao/Update`, data).then(response => {
+        return response
+    })
+}
+
+
 const deleteNhatkyMaycaos = async (datas) => {
     return await api.post(`Nhatkymaycao/DeleteMultipale`, datas).then(response => {
+        return response
+    })
+}
+
+const deleteNhatkymaycao = async (id) => {
+    return await api.delete(`Nhatkymaycao/${id}`).then(response => {
         return response
     })
 }
@@ -43,5 +42,7 @@ export const nhatkymaycaoService = {
     addNhatkymaycao,
     addNhatkymaycaos,
     deleteNhatkyMaycaos,
+    updateNhatkymaycao,
+    deleteNhatkymaycao
 
 }

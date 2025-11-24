@@ -22,8 +22,10 @@ import { tonghopquatgioService } from '../../service/maycao/tonghopmaycaoService
 import { danhmucmaycaoService } from '../../service/maycao/danhmucmaycaoService'
 import { phongbanService } from '../../service/phongbanService'
 import Thongsomaycao from './Thongsomaycao'
-import { useDispatch } from 'react-redux'
+import * as XLSX from 'xlsx'
+import { DownloadOutlined } from '@ant-design/icons'
 import Nhatkymaycao from './Nhatkymaycao'
+import { useDispatch } from 'react-redux'
 
 
 const { Option } = Select
@@ -50,6 +52,7 @@ const Capnhatmaycao = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [activeTab, setActiveTab] = useState('1')
   const [searchText, setSearchText] = useState('')
+  const [isNarrow, setIsNarrow] = useState(false)
   const dispatch = useDispatch()
   const {
     control,
@@ -76,6 +79,13 @@ const Capnhatmaycao = () => {
 
   useEffect(() => {
     fetchAll()
+  }, [])
+
+  useEffect(() => {
+    const check = () => setIsNarrow(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   const fetchAll = async () => {
@@ -128,7 +138,7 @@ const Capnhatmaycao = () => {
   }
 
   const onDelete = async (record) => {
-    try {
+    try {      
       await tonghopquatgioService.deleteMaycao(record.id)
       message.success('Xóa thành công')
       fetchAll()
@@ -173,6 +183,40 @@ const Capnhatmaycao = () => {
     }
   }
 
+  const exportToExcel = () => {
+    try {
+      const rowsToExport = (selectedRowKeys && selectedRowKeys.length > 0)
+        ? rows.filter((r) => selectedRowKeys.includes(r.id))
+        : filtered
+
+      if (!rowsToExport || rowsToExport.length === 0) {
+        message.info('Không có dữ liệu để xuất')
+        return
+      }
+
+      const mapped = rowsToExport.map((r) => ({
+        'Mã quản lý': r.maQuanLy || '',
+        'Thiết bị': r.tenThietBi || '',
+        'Đơn vị': r.tenDonVi || '',
+        'Vị trí': r.viTriLapDat || '',
+        'Ngày lắp': formatDate(r.ngayLap) || '',
+        'Số lượng': r.soLuong ?? '',
+        'Tình trạng': r.tinhTrangThietBi || '',
+        'Dự phòng': r.duPhong ? 'Có' : 'Không',
+        'Ghi chú': r.ghiChu || '',
+      }))
+
+      const ws = XLSX.utils.json_to_sheet(mapped)
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'MayCao')
+      const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+      XLSX.writeFile(wb, `maycao_export_${ts}.xlsx`)
+    } catch (err) {
+      console.error(err)
+      message.error('Xuất file lỗi')
+    }
+  }
+
   const filtered = useMemo(() => {
     const q = (searchText || '').trim().toLowerCase()
     if (!q) return rows
@@ -205,9 +249,9 @@ const Capnhatmaycao = () => {
   }
 
   const columns = [
-    { title: 'Mã quản lý', dataIndex: 'maQuanLy', key: 'maQuanLy' },
+    { title: 'Mã quản lý', dataIndex: 'maQuanLy', key: 'maQuanLy', fixed: 'left', width: 120 },
     { title: 'Thiết bị', dataIndex: 'tenThietBi', key: 'tenThietBi' },
-    { title: 'Đơn vị', dataIndex: 'tenDonVi', key: 'tenDonVi' },
+    { title: 'Đơn vị', dataIndex: 'tenDonVi', key: 'tenDonVi' },   
     { title: 'Vị trí', dataIndex: 'viTriLapDat', key: 'viTriLapDat' },
     {
       title: 'Ngày lắp',
@@ -247,28 +291,78 @@ const Capnhatmaycao = () => {
 
   return (
     <div>
-      <Space style={{ marginBottom: 12 }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openNew}>
-          Thêm
-        </Button>
-        <Popconfirm
-          title={`Bạn có chắc muốn xóa ${selectedRowKeys.length} bản ghi?`}
-          onConfirm={onDeleteSelected}
-          okText="Có"
-          cancelText="Không"
-        >
-          <Button danger disabled={!selectedRowKeys.length}>
-            Xóa đã chọn
-          </Button>
-        </Popconfirm>
-        <Input.Search
-          placeholder="Tìm kiếm..."
-          allowClear
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 320 }}
-          value={searchText}
-        />
-      </Space>
+      <div style={{ marginBottom: 12 }}>
+        {!isNarrow ? (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Space>
+                <Button type="primary" icon={<PlusOutlined />} onClick={openNew}>
+                  Thêm
+                </Button>
+                <Popconfirm
+                  title={`Bạn có chắc muốn xóa ${selectedRowKeys.length} bản ghi?`}
+                  onConfirm={onDeleteSelected}
+                  okText="Có"
+                  cancelText="Không"
+                >
+                  <Button danger disabled={!selectedRowKeys.length}>
+                    Xóa đã chọn
+                  </Button>
+                </Popconfirm>
+                 <Input.Search
+                placeholder="Tìm kiếm..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 320 }}
+                value={searchText}
+              />
+              </Space>
+
+              <Space>
+                <Button type="primary" icon={<DownloadOutlined />} onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
+              </Space>
+            </div>
+           
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 8 }}>
+              <Input.Search
+                placeholder="Tìm kiếm..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: '100%' }}
+                value={searchText}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Space>
+                <Button type="primary" icon={<PlusOutlined />} onClick={openNew}>
+                  Thêm
+                </Button>
+                <Popconfirm
+                  title={`Bạn có chắc muốn xóa ${selectedRowKeys.length} bản ghi?`}
+                  onConfirm={onDeleteSelected}
+                  okText="Có"
+                  cancelText="Không"
+                >
+                  <Button danger disabled={!selectedRowKeys.length}>
+                    Xóa đã chọn
+                  </Button>
+                </Popconfirm>
+              </Space>
+
+              <Space>
+                <Button type="primary" icon={<DownloadOutlined />} onClick={exportToExcel}>
+                  Xuất Excel
+                </Button>
+              </Space>
+            </div>
+          </>
+        )}
+      </div>
 
       <Table
         rowKey="id"
@@ -277,6 +371,7 @@ const Capnhatmaycao = () => {
         columns={columns}
         pagination={{ pageSize: 10 }}
         rowSelection={{ selectedRowKeys, onChange: setSelectedRowKeys }}
+        scroll={{ x: 1500 }}
       />
 
       <Modal
@@ -441,13 +536,22 @@ const Capnhatmaycao = () => {
             </form>
           </TabPane>
           <TabPane tab="Nhật ký thiết bị" key="2" disabled={!editing}>
-            {editing ? <Nhatkymaycao nhatkymaycao={maycao} />:<div>Chọn bản ghi để xem nhật ký thiết bị</div>}
+            {editing ? (
+              <Nhatkymaycao nhatkymaycao={maycao} />
+            ) : (
+              <div>Chọn bản ghi để xem nhật ký thiết bị</div>
+            )}
           </TabPane>
           <TabPane tab="Thông số kỹ thuật" key="3" disabled={!editing}>
-            {editing ? <Thongsomaycao thongsomaycaos={maycao} /> : <div>Chọn bản ghi để xem thông số kỹ thuật</div>}
+            {editing ? (
+              <Thongsomaycao thongsomaycaos={maycao} />
+            ) : (
+              <div>Chọn bản ghi để xem thông số kỹ thuật</div>
+            )}
           </TabPane>
         </Tabs>
       </Modal>
+      
     </div>
   )
 }

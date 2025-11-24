@@ -51,7 +51,7 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
       const res = await nhatkymaycaoService.getNhatkyById(id)
       const items = (res?.data || []).map((r) => ({
         ...r,
-        ngayNhap: r.ngayNhap ? dayjs(r.ngayNhap) : null,
+        ngayThang: r.ngayThang ? dayjs(r.ngayThang) : null,
       }))
       setData(items)
     } catch (err) {
@@ -72,7 +72,7 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
   const edit = (record) => {
     form.setFieldsValue({
       tongHopMayCaoId: record.tongHopMayCaoId || null,
-      ngayThay: record.ngayThay || null,
+      ngayThang: record.ngayThang || null,
       donVi: record.donVi || '',
       viTri: record.viTri || '',
       trangThai: record.trangThai || '',
@@ -97,21 +97,31 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
       const payload = {
         ...record,
         ...row,
-        ngayNhap: row.ngayNhap ? row.ngayNhap.toISOString() : null,
+        ngayThang: row.ngayThang ? row.ngayThang.format('YYYY-MM-DD') : null,
+      }
+      const items={
+        id: 0,
+        tongHopMayCaoId: payload.tongHopMayCaoId,
+        ngayThang: payload.ngayThang,
+        donVi: payload.donVi,
+        viTri: payload.viTri,
+        trangThai: payload.trangThai,
+        ghiChu: payload.ghiChu,
       }
       setLoading(true)
       if ((key + '').startsWith('new_')) {
         // create
-        const res = await nhatkymaycaoService.addNhatkymaycaos(payload)
+        console.log('payload', items)
+        const res = await nhatkymaycaoService.addNhatkymaycao(items)
         message.success('Thêm nhật ký thành công')
         await fetch()
       } else {
         // update
-        await nhatkymaycaoService.addNhatkymaycaos(payload)
+        await nhatkymaycaoService.updateNhatkymaycao(items)
         message.success('Cập nhật nhật ký thành công')
         setData((prev) =>
           prev.map((item) =>
-            item.key === key ? { ...item, ...payload, ngayNhap: row.ngayNhap } : item,
+            item.key === key ? { ...item, ...payload, ngayThang: row.ngayThang } : item,
           ),
         )
       }
@@ -124,14 +134,14 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
     }
   }
 
-  const handleDelete = async (record) => {
+  const handleDelete = async (record) => {  
     try {
       setLoading(true)
       if ((record.key + '').startsWith('new_')) {
         setData((prev) => prev.filter((r) => r.key !== record.key))
         message.success('Đã hủy bản ghi mới')
       } else {
-        await nhatkymaycaoService.deleteNhatkyMaycaos(record)
+        await nhatkymaycaoService.deleteNhatkymaycao(record.id)
         message.success('Xóa nhật ký thành công')
         setData((prev) => prev.filter((r) => r.key !== record.key))
       }
@@ -149,7 +159,7 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
       key,
       id: null,
       tongHopMayCaoId: id,
-      ngayThay: dayjs(),
+      ngayThang: dayjs(),
       donVi: '',
       viTri: '',
       trangThai: '',
@@ -157,7 +167,7 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
     }
     setData((prev) => [newRow, ...prev])
     form.setFieldsValue({
-      ngayThay: newRow.ngayThay,
+     ngayThang: newRow.ngayThang,
       donVi: newRow.donVi,
       viTri: newRow.viTri,
       trangThai: newRow.trangThai,
@@ -169,17 +179,20 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
   const columns = [
     {
       title: 'Ngày',
-      dataIndex: 'ngayNhap',
-      key: 'ngayNhap',
+      dataIndex: 'ngayThang',
+      key: 'ngayThang',
       width: 160,
       editable: true,
-      render: (val) => (val ? dayjs(val).format('DD/MM/YYYY') : '-'),
+      inputType: 'date',
+      fixed: 'left',
+      render: (val) => (val ? dayjs(val).format('DD/MM/YYYY') : '-')
     },
     {
       title: 'Đơn vị',
       dataIndex: 'donVi',
       key: 'donVi',
       editable: true,
+      fixed: 'left',
     },
     {
       title: 'Vị trí',
@@ -239,7 +252,7 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
       ...col,
       onCell: (record) => ({
         record,
-        inputType: col.dataIndex === 'ngayNhap' ? 'date' : 'text',
+        inputType: col.inputType || (col.dataIndex === 'ngayThang' ? 'date' : 'text'),
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
@@ -274,7 +287,7 @@ const Nhatkymaycao = ({ nhatkymaycao }) => {
           },
         }}
         rowClassName="editable-row"
-        bordered
+        bordered       
         dataSource={data}
         columns={mergedColumns}
         rowKey="key"
