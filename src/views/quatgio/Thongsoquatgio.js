@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 const Thongsoquatgio = () => {
 
     const datas = useSelector(state => state.thongsoquatgios.data)
+    console.log("thongsoquatgio", datas)
     return (
         <>
             <div className="card">
