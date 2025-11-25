@@ -36,6 +36,7 @@ const Capnhatthongsomaycao = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [selectedRows, setSelectedRows] = useState([])
   const [searchText, setSearchText] = useState('')
+  const [isNarrow, setIsNarrow] = useState(false)
 
   const {
     control,
@@ -50,6 +51,13 @@ const Capnhatthongsomaycao = () => {
   useEffect(() => {
     fetchDanhmuc()
     fetchData()
+  }, [])
+
+  useEffect(() => {
+    const check = () => setIsNarrow(window.innerWidth <= 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [])
 
   const fetchDanhmuc = async () => {
@@ -234,38 +242,88 @@ const Capnhatthongsomaycao = () => {
 
   return (
     <div>
-      <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" icon={<FileAddFilled />} onClick={onAdd}>
-          Thêm
-        </Button>
-        <Popconfirm
-          title={`Bạn có chắc muốn xóa ${selectedRowKeys.length} bản ghi đã chọn?`}
-          onConfirm={onDeleteSelected}
-          okText="Có"
-          cancelText="Không"
-        >
-          <Button danger icon={<DeleteFilled />} disabled={selectedRowKeys.length === 0}>
-            Xóa đã chọn
-          </Button>
-        </Popconfirm>
-        <Button
-          color="primary"
-          variant="outlined"
-          icon={<DownloadOutlined />}
-          onClick={() => exportToExcel()}
-        >
-          Xuất Excel
-        </Button>
-        <Input.Search
-          color="primary"
-          variant="outlined"
-          placeholder="Tìm kiếm ..."
-          allowClear
-          onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 260 }}
-          value={searchText}
-        />
-      </Space>
+      <div style={{ marginBottom: 12 }}>
+        {!isNarrow ? (
+          <>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Space>
+                <Button type="primary" icon={<FileAddFilled />} onClick={onAdd}>
+                  Thêm
+                </Button>
+                <Popconfirm
+                  title={`Bạn có chắc muốn xóa ${selectedRowKeys.length} bản ghi đã chọn?`}
+                  onConfirm={onDeleteSelected}
+                  okText="Có"
+                  cancelText="Không"
+                >
+                  <Button danger icon={<DeleteFilled />} disabled={selectedRowKeys.length === 0}>
+                    Xóa đã chọn
+                  </Button>
+                </Popconfirm>
+
+                <Input.Search
+                  color="primary"
+                  variant="outlined"
+                  placeholder="Tìm kiếm ..."
+                  allowClear
+                  onChange={(e) => setSearchText(e.target.value)}
+                  style={{ width: 260 }}
+                  value={searchText}
+                />
+              </Space>
+              <Space>
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  icon={<DownloadOutlined />}
+                  onClick={() => exportToExcel()}
+                >
+                  Xuất Excel
+                </Button>
+              </Space>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 8 }}>
+              <Input.Search
+                color="primary"
+                variant="outlined"
+                placeholder="Tìm kiếm ..."
+                allowClear
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 260 }}
+                value={searchText}
+              />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Space>
+                <Button type="primary" icon={<FileAddFilled />} onClick={onAdd}>
+                  Thêm
+                </Button>
+                <Popconfirm
+                  title={`Bạn có chắc muốn xóa ${selectedRowKeys.length} bản ghi đã chọn?`}
+                  onConfirm={onDeleteSelected}
+                  okText="Có"
+                  cancelText="Không"
+                >
+                  <Button danger icon={<DeleteFilled />} disabled={selectedRowKeys.length === 0}>
+                    Xóa đã chọn
+                  </Button>
+                </Popconfirm>
+                <Button
+                  color="primary"
+                  variant="outlined"
+                  icon={<DownloadOutlined />}
+                  onClick={() => exportToExcel()}
+                >
+                  Xuất Excel
+                </Button>
+              </Space>
+            </div>
+          </>
+        )}
+      </div>
 
       <Table
         rowKey="id"
@@ -289,6 +347,8 @@ const Capnhatthongsomaycao = () => {
         onCancel={() => setModalVisible(false)}
         footer={null}
         destroyOnHidden
+        maskClosable={false}
+        zIndex={2000}
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <Row gutter={16} style={{ marginBottom: 24 }}>

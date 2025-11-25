@@ -128,6 +128,20 @@ const _nav = [
 
     ],
   },
+   {
+    component: CNavGroup,
+    name: 'Máy xúc',
+    to: '/mayxuc',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+    items: [     
+      {
+        component: CNavItem,
+        name: 'Cập nhật máy xúc',
+        to: '/mayxuc/capnhatmayxuc',
+      },     
+
+    ],
+  },
 
   {
     component: CNavTitle,

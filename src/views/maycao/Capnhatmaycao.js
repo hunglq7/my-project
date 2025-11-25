@@ -14,7 +14,7 @@ import {
   Col,
   Tabs,
 } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { PlusOutlined, EditOutlined, DeleteOutlined, FileAddFilled } from '@ant-design/icons'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -296,7 +296,7 @@ const Capnhatmaycao = () => {
           <>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Space>
-                <Button type="primary" icon={<PlusOutlined />} onClick={openNew}>
+                <Button type="primary" icon={<FileAddFilled />} onClick={openNew}>
                   Thêm
                 </Button>
                 <Popconfirm
@@ -305,7 +305,7 @@ const Capnhatmaycao = () => {
                   okText="Có"
                   cancelText="Không"
                 >
-                  <Button danger disabled={!selectedRowKeys.length}>
+                  <Button danger icon={<DeleteOutlined/>} disabled={!selectedRowKeys.length}>
                     Xóa đã chọn
                   </Button>
                 </Popconfirm>
@@ -319,7 +319,8 @@ const Capnhatmaycao = () => {
               </Space>
 
               <Space>
-                <Button type="primary" icon={<DownloadOutlined />} onClick={exportToExcel}>
+                <Button  color="primary"
+                  variant="outlined" icon={<DownloadOutlined />} onClick={exportToExcel}>
                   Xuất Excel
                 </Button>
               </Space>
@@ -339,7 +340,7 @@ const Capnhatmaycao = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Space>
-                <Button type="primary" icon={<PlusOutlined />} onClick={openNew}>
+                <Button type="primary" icon={<FileAddFilled/>} onClick={openNew}>
                   Thêm
                 </Button>
                 <Popconfirm
@@ -348,14 +349,15 @@ const Capnhatmaycao = () => {
                   okText="Có"
                   cancelText="Không"
                 >
-                  <Button danger disabled={!selectedRowKeys.length}>
+                  <Button danger icon={<DeleteOutlined/>}  disabled={!selectedRowKeys.length}>
                     Xóa đã chọn
                   </Button>
                 </Popconfirm>
               </Space>
 
               <Space>
-                <Button type="primary" icon={<DownloadOutlined />} onClick={exportToExcel}>
+                <Button  color="primary"
+                  variant="outlined" icon={<DownloadOutlined />} onClick={exportToExcel}>
                   Xuất Excel
                 </Button>
               </Space>
@@ -381,10 +383,12 @@ const Capnhatmaycao = () => {
         open={open}
         onCancel={() => setOpen(false)}
         footer={null}
-        forceRender
+        forceRender      
+       maskClosable={false}
+       zIndex={2000}
       >
         <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key)}>
-          <TabPane tab="Cập nhật thông tin máy cào" key="1">
+          <Table.TabPane tab="CẬP NHẬT MÁY CÀO" key="1">
             <form onSubmit={handleSubmit(onSubmit)}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
@@ -534,21 +538,21 @@ const Capnhatmaycao = () => {
                 </Button>
               </div>
             </form>
-          </TabPane>
-          <TabPane tab="Nhật ký thiết bị" key="2" disabled={!editing}>
+          </Table.TabPane>
+          <Table.TabPane tab="NHẬT KÝ THIẾT BỊ" key="2" disabled={!editing}>
             {editing ? (
               <Nhatkymaycao nhatkymaycao={maycao} />
             ) : (
               <div>Chọn bản ghi để xem nhật ký thiết bị</div>
             )}
-          </TabPane>
-          <TabPane tab="Thông số kỹ thuật" key="3" disabled={!editing}>
+          </Table.TabPane>
+          <Table.TabPane tab="THÔNG SỐ KỸ THUẬT" key="3" disabled={!editing}>
             {editing ? (
               <Thongsomaycao thongsomaycaos={maycao} />
             ) : (
               <div>Chọn bản ghi để xem thông số kỹ thuật</div>
             )}
-          </TabPane>
+          </Table.TabPane>
         </Tabs>
       </Modal>
       
