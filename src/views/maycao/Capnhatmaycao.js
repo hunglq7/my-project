@@ -110,7 +110,7 @@ const Capnhatmaycao = () => {
   const openNew = () => {
     setActiveTab('1')
     setEditing(null)
-    reset()
+    reset({mayCaoId: null, donViId: null, maQuanLy: '', viTriLapDat: '', ngayLap: '', soLuong: 1, tinhTrangThietBi: '', duPhong: false, ghiChu: ''})
     setOpen(true)
   }
 
@@ -506,6 +506,14 @@ const Capnhatmaycao = () => {
                     render={({ field }) => <Input {...field} />}
                   />
                 </div>
+                 <div style={{ gridColumn: '1 / -1' }}>
+                  <label>Ghi chú</label>
+                  <Controller
+                    name="ghiChu"
+                    control={control}
+                    render={({ field }) => <Input.TextArea rows={2} {...field} />}
+                  />
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Controller
                     name="duPhong"
@@ -519,14 +527,7 @@ const Capnhatmaycao = () => {
                   />
                   <label>Dự phòng</label>
                 </div>
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label>Ghi chú</label>
-                  <Controller
-                    name="ghiChu"
-                    control={control}
-                    render={({ field }) => <Input.TextArea rows={3} {...field} />}
-                  />
-                </div>
+               
               </div>
 
               <div style={{ textAlign: 'right', marginTop: 12 }}>

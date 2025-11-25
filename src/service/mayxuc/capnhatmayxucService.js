@@ -11,7 +11,7 @@ const getMayxucById = async (id) => {
     });
 };
 const addTonghopmayxuc = async (data) => {
-    return api.post(`Tonghopmayxuc`, data).then(response => {
+    return api.post(`Tonghopmayxuc/Add`, data).then(response => {
         return response
     })
 }

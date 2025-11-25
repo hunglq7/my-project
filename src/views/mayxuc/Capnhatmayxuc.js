@@ -7,6 +7,7 @@ import * as yup from 'yup'
 import { capnhatmayxucService } from '../../service/mayxuc/capnhatmayxucService'
 import { danhmucmayxucService } from '../../service/mayxuc/danhmucmayxucService'
 import { phongbanService } from '../../service/phongbanService'
+import { loaithietbiService } from '../../service/loaithietbi/loaithietbiService'
 import Nhatkymayxuc from './Nhatkymayxuc'
 import Thongsomayxuc from './Thongsomayxuc'
 
@@ -28,8 +29,8 @@ const schema = yup
 const Capnhatmayxuc = () => {
   const [rows, setRows] = useState([])
   const [devices, setDevices] = useState([])
-  const [types, setTypes] = useState([])
   const [donvis, setDonvis] = useState([])
+  const [loais, setLoais] = useState([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [editing, setEditing] = useState(null)
@@ -65,40 +66,29 @@ const Capnhatmayxuc = () => {
   const fetchAll = async () => {
     setLoading(true)
     try {
-      const [rRows, rDonvis, rDanhmuc] = await Promise.all([
+      const [rRows,rDonvis,rDanhmuc,rLoai] = await Promise.all([
         capnhatmayxucService.getMayxuc ? capnhatmayxucService.getMayxuc() : capnhatmayxucService.getAll?.(),
         phongbanService.getPhongban ? phongbanService.getPhongban() : phongbanService.getAll?.(),
-        danhmucmayxucService.getDanhmuc ? danhmucmayxucService.getDanhmuc() : danhmucmayxucService.getAll?.(),
+        danhmucmayxucService.getDanhmucmayxucs ? danhmucmayxucService.getDanhmucmayxucs() : danhmucmayxucService.getAll?.(),
+        loaithietbiService.getLoaithietbi ? loaithietbiService.getLoaithietbi() : loaithietbiService.getAll?.(),
       ])
-      setRows(rRows?.data || [])
-      setDevices(rRows?.data || [])
+      setRows(rRows?.data || [])      
       setDonvis(rDonvis?.data || [])
-      // build types from danhmuc or from rows
-      const t = (rDanhmuc?.data && Array.isArray(rDanhmuc.data) ? rDanhmuc.data : []).map((x) => ({
-        id: x.id ?? x.loaiId,
-        name: x.tenLoai || x.ten,
-      }))
-      if (!t.length) {
-        const map = new Map()
-        (rRows?.data || []).forEach((it) => {
-          const id = it.loaiThietBiId ?? it.loaiThietBi?.id
-          const name = it.loaiThietBiName ?? it.loaiThietBi?.tenLoai
-          if (id != null && !map.has(id)) map.set(id, { id, name: name || `Loại ${id}` })
-        })
-        setTypes(Array.from(map.values()))
-      } else setTypes(t)
+      setDevices(rDanhmuc?.data || [])
+      setLoais(rLoai?.data || [])      
     } catch (err) {
       console.error(err)
-      message.error('Lỗi tải dữ liệu')
+      message.error('Lấy dữ liệu thất bại') 
     } finally {
       setLoading(false)
     }
   }
-console.log(donvis)
+
+
   const openNew = () => {
     setActiveTab('1')
     setEditing(null)
-    reset()
+    reset({mayxucId: null, phongBanId: null, loaiThietBiId: null, maQuanLy: '', viTriLapDat: '', ngayLap: '', soLuong: 1, tinhTrang: '', duPhong: false, ghiChu: ''})
     setOpen(true)
   }
 
@@ -122,7 +112,7 @@ console.log(donvis)
 
   const onDelete = async (record) => {
     try {
-      await tonghopmayxucService.deleteMayxuc(record.id)
+      await capnhatmayxucService.deleteMayxuc(record.id)
       message.success('Xóa thành công')
       fetchAll()
     } catch (err) {
@@ -137,7 +127,7 @@ console.log(donvis)
       return
     }
     try {
-      await tonghopmayxucService.deleteMayxucs(selectedRowKeys)
+      await capnhatmayxucService.deleteMayxucs(selectedRowKeys)
       message.success('Xóa nhiều bản ghi thành công')
       setSelectedRowKeys([])
       fetchAll()
@@ -152,13 +142,15 @@ console.log(donvis)
       const payload = { ...values }
       if (editing && editing.id) {
         payload.id = editing.id
-        await tonghopmayxucService.updateTonghopmayxuc(payload)
+        await capnhatmayxucService.updateTonghopmayxuc(payload)
         message.success('Cập nhật thành công')
+        setOpen(false)
       } else {
-        await tonghopmayxucService.addTonghopmayxuc(payload)
+        await capnhatmayxucService.addTonghopmayxuc(payload)
         message.success('Thêm mới thành công')
+        reset({mayxucId: null, phongBanId: null, loaiThietBiId: null, maQuanLy: '', viTriLapDat: '', ngayLap: '', soLuong: 1, tinhTrang: '', duPhong: false, ghiChu: ''})
       }
-      setOpen(false)
+      
       fetchAll()
     } catch (err) {
       console.error(err)
@@ -177,8 +169,8 @@ console.log(donvis)
 
   const columns = [
     { title: 'Mã quản lý', dataIndex: 'maQuanLy', key: 'maQuanLy', fixed: 'left', width: 140 },
-    { title: 'Thiết bị', dataIndex: 'tenThietBi', key: 'tenThietBi' },
-    { title: 'Đơn vị/Phòng', dataIndex: 'tenDonVi', key: 'tenDonVi' },
+    { title: 'Thiết bị', dataIndex: 'tenMayXuc', key: 'tenMayXuc' },
+    { title: 'Đơn vị/Phòng', dataIndex: 'tenPhongBan', key: 'tenPhongBan' },
     { title: 'Vị trí', dataIndex: 'viTriLapDat', key: 'viTriLapDat' },
     {
       title: 'Ngày lắp',
@@ -259,8 +251,7 @@ console.log(donvis)
         onCancel={() => setOpen(false)}
         footer={null}
         forceRender
-        maskClosable={false}
-        maskClosable={false}
+        maskClosable={false}       
         zIndex={2000}
        
       >
@@ -311,9 +302,9 @@ console.log(donvis)
                     control={control}
                     render={({ field }) => (
                       <Select {...field} placeholder="Chọn loại thiết bị" style={{ width: '100%' }} allowClear>
-                        {types.map((t) => (
+                        {loais.map((t) => (
                           <Option key={t.id} value={t.id}>
-                            {t.name}
+                            {t.tenLoai || t.name}
                           </Option>
                         ))}
                       </Select>
@@ -350,6 +341,11 @@ console.log(donvis)
                   <Controller name="tinhTrang" control={control} render={({ field }) => <Input {...field} />} />
                 </div>
 
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label>Ghi chú</label>
+                  <Controller name="ghiChu" control={control} render={({ field }) => <Input.TextArea rows={2} {...field} />} />
+                </div>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Controller
                     name="duPhong"
@@ -359,10 +355,7 @@ console.log(donvis)
                   <label>Dự phòng</label>
                 </div>
 
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <label>Ghi chú</label>
-                  <Controller name="ghiChu" control={control} render={({ field }) => <Input.TextArea rows={3} {...field} />} />
-                </div>
+                
               </div>
 
               <div style={{ textAlign: 'right', marginTop: 12 }}>
@@ -381,7 +374,7 @@ console.log(donvis)
           </TabPane>
 
           <TabPane tab="THÔNG SỐ KỸ THUẬT" key="3" disabled={!editing}>
-            {editing ? <Thongsomayxuc thongsomaycaos={editing} /> : <div>Chọn bản ghi để xem thông số kỹ thuật</div>}
+            {editing ? <Thongsomayxuc thongsomayxuc={editing} /> : <div>Chọn bản ghi để xem thông số kỹ thuật</div>}
           </TabPane>
         </Tabs>
       </Modal>
